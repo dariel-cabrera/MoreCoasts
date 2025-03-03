@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 
@@ -7,11 +7,25 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // 🔐 Endpoint para iniciar sesión
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto.email, loginDto.password);
+@Post('login')
+@HttpCode(HttpStatus.OK)
+async login(@Body() loginDto: { data: { type: string; attributes: { email: string; password: string } } }) {
+  const { type, attributes } = loginDto.data;
+
+  console.log('Datos recibidos del frontend:', loginDto);
+
+  // Validar que el tipo sea 'token'
+  if (type !== 'token') {
+    throw new HttpException('Tipo de datos no válido', HttpStatus.BAD_REQUEST);
   }
+
+  // Extraer email y password de attributes
+  const { email, password } = attributes;
+
+  // Llamar al servicio con los datos extraídos
+  return this.authService.login(email, password);
+}
+
 
   // 📝 Endpoint para registrar un nuevo usuario
   @Post('register')

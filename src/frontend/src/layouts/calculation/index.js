@@ -19,11 +19,11 @@ import Footer from "examples/Footer";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
-
+import { useState } from "react";
 import CalculationTable from "./table";
 import { TablaCalculo } from "./table/dataTable";
 
-const [calculo, setCalculo] = useState({
+{/* const [calculo, setCalculo] = useState({
   densidad_a: 0,
   densidad_m: 0,
   coeficiente: 0,
@@ -81,7 +81,7 @@ function Calculation(){
     return (
         <DashboardLayout>
           <DashboardNavbar />
-          {/*Sección de Tarjetas de Estadísticas */}
+          {/*Sección de Tarjetas de Estadísticas 
           <MDBox py={3}  textAlign="center">
              <MDTypography variant="h4" fontWeight="medium"  color="black" mt={1}>
                     Gestión de Cálculos
@@ -93,13 +93,13 @@ function Calculation(){
                 </MDButton>
             </MDBox>
 
-            <TablaCalculo
+            /* <TablaCalculo
               datos={calculos}
               onEliminar={(id) => eliminarDatos({ idValue: id, getDatos, limpiarDatos })}
               onEditar={(val) => {
                 editarCalculos(val);
               }}
-            />
+            />  
            
 
           
@@ -109,6 +109,6 @@ function Calculation(){
     );
 
 
-}
+} 
 
-export default Calculation;
+export default Calculation;  */}

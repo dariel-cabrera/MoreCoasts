@@ -1,14 +1,32 @@
-import { IsEmail, IsNotEmpty, MinLength, Matches } from 'class-validator';
-
-export class LoginDto {
-  @IsEmail()
+import { IsEmail, IsNotEmpty, MinLength, Matches, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+class AttributesDto {
+  @IsString()
   @IsNotEmpty()
   email: string;
 
+  @IsString()
   @IsNotEmpty()
   password: string;
 }
 
+class DataDto {
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+
+  @ValidateNested()
+  @Type(() => AttributesDto)
+  @IsNotEmpty()
+  attributes: AttributesDto;
+}
+
+export class LoginDto {
+  @ValidateNested()
+  @Type(() => DataDto)
+  @IsNotEmpty()
+  data: DataDto;
+}
 export class RegisterDto {
   @IsNotEmpty()
   name: string;
