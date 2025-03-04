@@ -15,6 +15,11 @@ class  CalculationService {
         const url="updateCalculation"
         return await HttpService.put(`${url}/${id}`,datos)
     };
+
+    postCalculation=async(datos)=>{
+        const url="postCalculation"
+        return await HttpService.post(url,datos)
+    }
 }
 
 export default new CalculationService();

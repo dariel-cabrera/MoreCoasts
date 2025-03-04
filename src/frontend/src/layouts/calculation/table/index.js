@@ -11,16 +11,16 @@ function CalculationTable({ datos, getDatos, limpiarDatos, editarCalculos }) {
   const tablaCalculo = TablaCalculo({
     datos: datos,
     onEditar: (val) => editarCalculos(val),
-    onEliminar: (id) => eliminarDatos({id:id, getDatos:getDatos, limpiarDatos:limpiarDatos}),
+    onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
   });
 
   return (
     <DashboardLayout>
       <MDBox pt={6} pb={3}>
-        {/* Contenedor principal alineado a la izquierda */}
-        <Grid container spacing={2} justifyContent="flex-start">
-          <Grid item xs={12} md={8}> {/* Reducir el ancho para moverlo más a la izquierda */}
-            <Card style={{ marginLeft: "20px", width: "100%" }}> {/* Ajuste de margen */}
+        {/* Contenedor principal ocupando toda la pantalla */}
+        <Grid container spacing={6} >
+          <Grid item xs={12}> {/* Ocupar todo el ancho */}
+            <Card > {/* Asegurar que ocupe todo el espacio */}
               <MDBox
                 mx={2}
                 mt={-3}
@@ -35,7 +35,7 @@ function CalculationTable({ datos, getDatos, limpiarDatos, editarCalculos }) {
                   Cálculo Teórico del Transporte de Sedimentos
                 </MDTypography>
               </MDBox>
-              <MDBox pt={3}>
+              <MDBox pt={3} px={2}> {/* Espaciado interno uniforme */}
                 <DataTable
                   table={tablaCalculo}
                   isSorted={false}

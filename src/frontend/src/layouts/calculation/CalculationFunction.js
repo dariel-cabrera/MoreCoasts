@@ -1,84 +1,134 @@
 import Swal from 'sweetalert2';
-import { eliminar,actualizar } from './CalculationHttp';
+import { eliminar, actualizar, crear } from './CalculationHttp';
 
-export const eliminarDatos= ({idValue,getDatos, limpiarDatos}) =>{
-    const swalWithBootstrapButtons = Swal.mixin({
-      customClass: {
-        confirmButton: "btn btn-success",
-        cancelButton: "btn btn-danger"
-      },
-      buttonsStyling: false
-    });
+// Función para eliminar datos
+export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger"
+    },
+    buttonsStyling: false
+  });
+
+  const result = await swalWithBootstrapButtons.fire({
+    title: "¿Estás Seguro?",
+    text: "Deseas eliminar los datos",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminarlos!",
+    cancelButtonText: "No, cancelar!",
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await eliminar(idValue);
+      await getDatos();
+      limpiarDatos();
+      swalWithBootstrapButtons.fire({
+        title: "Eliminados!",
+        text: "Sus datos han sido eliminados",
+        icon: "success"
+      });
+    } catch (error) {
+      swalWithBootstrapButtons.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar los datos",
+        icon: "error"
+      });
+    }
+  } else {
     swalWithBootstrapButtons.fire({
-      title: "¿Estas Seguro?",
-      text: "Deseas eliminar los datos",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Si,eliminarlos!",
-      cancelButtonText: "No, cancelar!",
-      reverseButtons: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        eliminar(idValue)
-        swalWithBootstrapButtons.fire({
-          title: "Eliminados!",
-          text: "Sus Datos han sido Eliminados",
-          icon: "success"
-        });
-      } else if (
-        /* Read more about handling dismissals below */
-        result.dismiss === Swal.DismissReason.cancel
-      ) {
-        swalWithBootstrapButtons.fire({
-          title: "Cancelado",
-          text: "Operación Cancelada",
-          icon: "error"
-        });
-      }
+      title: "Cancelado",
+      text: "Operación cancelada",
+      icon: "error"
     });
-    getDatos();
-    limpiarDatos();
-    
-  } 
-
-  export const actualizarDatos= ({id, calculo, getDatos, limpiarDatos}) =>{
-    const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
-    
-    const swalWithBootstrapButtons = Swal.mixin({
-      customClass: {
-        confirmButton: "btn btn-success",
-        cancelButton: "btn btn-danger"
-      },
-      buttonsStyling: false
-    });
-    swalWithBootstrapButtons.fire({
-      title: "¿Estas Seguro?",
-      text: "Deseas actualizar los datos",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Si,actualizalos!",
-      cancelButtonText: "No, cancelar!",
-      reverseButtons: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        actualizar(id,densidad_a,densidad_m,indice,coeficiente,altura,angulo,aceleracion,P);
-        getDatos();
-        swalWithBootstrapButtons.fire({
-          title: "Actualizdos!",
-          text: "Sus Datos han sido actualizados.",
-          icon: "success"
-        });
-      } else if (
-        /* Read more about handling dismissals below */
-        result.dismiss === Swal.DismissReason.cancel
-      ) {
-        swalWithBootstrapButtons.fire({
-          title: "Cancelado",
-          text: "Operación Cancelada",
-          icon: "error"
-        });
-      }
-    });
-    limpiarDatos();
-
   }
+};
+
+// Función para actualizar datos
+export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) => {
+  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton: "btn btn-success",
+      cancelButton: "btn btn-danger"
+    },
+    buttonsStyling: false
+  });
+
+  const result = await swalWithBootstrapButtons.fire({
+    title: "¿Estás Seguro?",
+    text: "Deseas actualizar los datos",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, actualizarlos!",
+    cancelButtonText: "No, cancelar!",
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await actualizar(id, densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+      await getDatos();
+      limpiarDatos();
+      swalWithBootstrapButtons.fire({
+        title: "Actualizados!",
+        text: "Sus datos han sido actualizados.",
+        icon: "success"
+      });
+    } catch (error) {
+      swalWithBootstrapButtons.fire({
+        title: "Error",
+        text: "Hubo un problema al actualizar los datos",
+        icon: "error"
+      });
+    }
+  } else {
+    swalWithBootstrapButtons.fire({
+      title: "Cancelado",
+      text: "Operación cancelada",
+      icon: "error"
+    });
+  }
+};
+
+// Función para calcular y crear datos
+export const calcularDatos = async ({ calculo, getDatos, limpiarDatos }) => {
+  if (!calculo) {
+    console.error("calculo is undefined");
+    return;
+  }
+
+  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
+
+  if (!densidad_a || !densidad_m || !indice || !coeficiente || !altura || !angulo || !aceleracion || !P) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Por favor, complete todos los campos antes de calcular.'
+    });
+    return;
+  }
+
+  try {
+    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+    await getDatos();
+    Swal.fire({
+      position: "top-end",
+      icon: "success",
+      title: "Datos calculados con éxito",
+      showConfirmButton: false,
+      timer: 1500
+    });
+    limpiarDatos();
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Hubo un problema al calcular los datos.'
+    });
+  }
+};

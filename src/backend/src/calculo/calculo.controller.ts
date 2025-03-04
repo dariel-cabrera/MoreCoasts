@@ -15,7 +15,7 @@ export class CalculoController {
         return this.calculoService.getCalculo();
       }
 
-      @Post('/calculo')
+      @Post('postCalculation')
       async createCalculos(@Body() calculo: CreateCalculoDto){
         const {
           densidad_a,
