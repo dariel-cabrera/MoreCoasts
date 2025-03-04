@@ -2,12 +2,15 @@ import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
+import MDButton from "components/MDButton";
+import { actualizarDatos } from "./CalculationFunction";
 
-export const NuevoCalculo = ({ calculo, setCalculo }) => {
+
+export const NuevoCalculo = ({ calculo, setCalculo,editar,limpiarDatos }) => {
   const handleChange = (e) => {
     setCalculo({ ...calculo, [e.target.name]: e.target.value });
   };
-
+ const {id}=calculo;
   return (
     <Grid container direction="column" sx={{ pl: 2 }}>
       <MDTypography variant="h5" fontWeight="medium" color="black" mt={1} mb={2}>
@@ -39,6 +42,32 @@ export const NuevoCalculo = ({ calculo, setCalculo }) => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Botones según el estado de edición */}
+      <MDBox sx={{ mt: 4 }}>
+        {editar ? (
+          <>
+            <MDButton variant="gradient" color="info" size="medium" onClick={actualizarDatos({ id,calculo, getDatos, limpiarDatos})}>
+              Actualizar
+            </MDButton>
+            <MDButton variant="gradient" color="info" size="medium" onClick={limpiarDatos}>
+              Cancelar
+            </MDButton>
+            <MDButton className="btn btn-success" onClick={calcularDatos({calculo,getDatos,limpiarDatos})}>
+              Nuevo
+            </MDButton>
+          </>
+        ) : (
+          <>
+            <MDButton className="btn btn-success m-2" onClick={calcularDatos({calculo,getDatos,limpiarDatos})}>
+              Calcular
+            </MDButton>
+            <MDButton className="btn btn-info m-2" onClick={limpiarDatos}>
+              Cancelar
+            </MDButton>
+          </>
+        )}
+      </MDBox>
 
       
     </Grid>

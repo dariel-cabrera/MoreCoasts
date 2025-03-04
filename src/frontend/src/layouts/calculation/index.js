@@ -96,9 +96,10 @@ function Calculation() {
       <NuevoCalculo 
         calculo={calculo}
         setCalculo={setCalculo}
+        editar={editar}
         limpiarDatos={limpiarDatos}
         getDatos={getDatos}
-        editar={editar}
+       
       />
       ):(
         <>
