@@ -2,13 +2,19 @@ import HttpService from "./htttp.service";
 
 class  CalculationService {
     getCalculation=async()=>{
-        const getCalculation="getCalculation";
-        return await HttpService.get(getCalculation);
-    }
+        const url="getCalculation";
+        return await HttpService.get(url);
+    };
 
-
-
-
+    deleteCalculation=async(id)=>{
+        const url="deleteCalculation";
+        return await HttpService.delete(`${url}/${id}`)
+    };
+    
+    updateCalculation=async(id,datos)=>{
+        const url="updateCalculation"
+        return await HttpService.put(`${url}/${id}`,datos)
+    };
 }
 
 export default new CalculationService();

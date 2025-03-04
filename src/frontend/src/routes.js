@@ -1,7 +1,7 @@
 
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
-// import Calculation from "layouts/calculation";
+import Calculation from "layouts/calculation";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
@@ -30,14 +30,14 @@ const routes = [
     route: "/dashboard",
     component: <Dashboard />,
   },
-  /* {
+   {
     type: "collapse",
     name: "Calculation",
     key: "calculation",
     icon: <Icon fontSize="small">Cálculo</Icon>,
     route: "/calculation",
     component: <Calculation />,
-  }, */
+  }, 
   {
     type: "collapse",
     name: "Tables",

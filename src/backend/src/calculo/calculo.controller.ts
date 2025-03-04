@@ -10,7 +10,7 @@ export class CalculoController {
         this.calculoService= calculoService;
       }
 
-      @Get('/calculo')
+      @Get('getCalculation')
       async getAllCalculos(){
         return this.calculoService.getCalculo();
       }
@@ -42,7 +42,7 @@ export class CalculoController {
           K,
         );
       }
-      @Put('/calculo/:id')
+      @Put('updateCalculation/:id')
       async updateCalculos(@Param('id') id:string, @Body() calculo:UpdateCalculoDto){
         const {
           densidad_a,
@@ -73,7 +73,7 @@ export class CalculoController {
 
      
 
-      @Delete('/calculo/:id')
+      @Delete('deleteCalculation/:id')
       async deleteCalculos(@Param('id') id: string){
         return this.calculoService.deleteCalculo(id);
       }
