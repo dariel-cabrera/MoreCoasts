@@ -1,4 +1,4 @@
-//  Librerías de terceros
+// Librerías de terceros
 import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -6,11 +6,11 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import CalculationTable from "./table";
 import CalculationService from "services/calculation-service";
-import { TablaCalculo } from "./table/dataTable";
 import { NuevoCalculo } from "./NuevoCalculo";
+
 function Calculation() {
   const [calculo, setCalculo] = useState({
     densidad_a: 0,
@@ -26,19 +26,18 @@ function Calculation() {
 
   const [editar, setEditar] = useState(false);
   const [mstNvoCalc, setMstNvoCalc] = useState(false);
-  const[calculos,setCalculos]=useState([])
+  const [calculos, setCalculos] = useState([]);
 
-  const getDatos= async()=> {
-    try{
-      const datos=  await CalculationService.getCalculation();
+  const getDatos = async () => {
+    try {
+      const datos = await CalculationService.getCalculation();
       setCalculos(datos);
       console.log(datos);
+    } catch (error) {
+      console.error(error);
     }
-    catch(error){
-      console.error(error)
-    }
+  };
 
-  }
   useEffect(() => {
     getDatos();
   }, []);
@@ -81,44 +80,43 @@ function Calculation() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout sx={{ width: "100%" }}>
       <DashboardNavbar />
-      
+
       <MDBox py={3} textAlign="center">
         <MDTypography variant="h4" fontWeight="medium" color="black" mt={1}>
           Gestión de Cálculos
         </MDTypography>
       </MDBox>
 
-     
-       
-      {mstNvoCalc ?(
-      <NuevoCalculo 
-        calculo={calculo}
-        setCalculo={setCalculo}
-        editar={editar}
-        limpiarDatos={limpiarDatos}
-        getDatos={getDatos}
-       
-      />
-      ):(
+      {mstNvoCalc ? (
+        <NuevoCalculo
+          calculo={calculo}
+          setCalculo={setCalculo}
+          editar={editar}
+          limpiarDatos={limpiarDatos}
+          getDatos={getDatos}
+        />
+      ) : (
         <>
-        <MDBox mt={2} mb={1}>
-        <MDButton variant="gradient" color="info" size="medium" onClick={handleNuevoCalculo}>
-          Nuevo
-        </MDButton>
-      </MDBox>
-      <CalculationTable
-        datos={calculos}
-        getDatos={getDatos}
-        limpiarDatos={limpiarDatos}
-        editarCalculos={(val)=>{editarCalculos(val)}}
-      />
-      </>
-       )
-      }
-      
-      
+          <MDBox mt={2} mb={1} width="100%">
+            <MDButton variant="gradient" color="info" size="medium" onClick={handleNuevoCalculo}>
+              Nuevo
+            </MDButton>
+          </MDBox>
+          <MDBox width="100%" display="flex" justifyContent="center">
+            <MDBox width="100%">
+              <CalculationTable
+                datos={calculos}
+                getDatos={getDatos}
+                limpiarDatos={limpiarDatos}
+                editarCalculos={(val) => editarCalculos(val)}
+              />
+            </MDBox>
+          </MDBox>
+        </>
+      )}
+
       <Footer />
     </DashboardLayout>
   );

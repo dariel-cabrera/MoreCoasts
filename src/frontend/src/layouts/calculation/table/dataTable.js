@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export const TablaCalculo = ({ datos, onEditar, onEliminar }) => {
   const columns = [
@@ -38,10 +40,10 @@ export const TablaCalculo = ({ datos, onEditar, onEliminar }) => {
     acciones: (
       <MDBox display="flex" justifyContent="space-around">
         <MDButton variant="gradient" color="info" size="small" onClick={() => onEditar(val)}>
-          Editar
+          <EditIcon />
         </MDButton>
         <MDButton variant="gradient" color="error" size="small" onClick={() => onEliminar(val._id)}>
-          Eliminar
+         <DeleteIcon />
         </MDButton>
       </MDBox>
     )
