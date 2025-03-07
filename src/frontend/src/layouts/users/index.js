@@ -10,8 +10,8 @@ import { Grid,Card } from "@mui/material";
 
 
 import { NewUser } from "./newUser";
-
-
+import { TablaUser } from "./table/dataTableUser";
+import DataTable from "examples/Tables/DataTable";
 
 function Users(){
     const [user,setUser]=useState({
@@ -59,11 +59,11 @@ function Users(){
         console.log("Editando Datos");
         setEditar(true);
         setMstNvoUser(true);
-        setCalculo({
+        setUser({
           name:val.name,
           lastname:val.lastname,
           user:val.user,
-          email:val.name,
+          email:val.email,
         });
     };
 
@@ -71,6 +71,11 @@ function Users(){
         setMstNvoUser(true);
     };
     
+    const tablaUser = TablaUser({
+        users:users,
+        onEditar: (val) => editarUsers(val),
+        //onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
+    });
     return (
         <DashboardLayout>
         <DashboardNavbar />
@@ -108,11 +113,17 @@ function Users(){
                   coloredShadow="info"
                 >
                   <MDTypography variant="h6" color="white">
-                    Authors Table
+                    Usuarios del Sistema
                   </MDTypography>
                 </MDBox>
                 <MDBox pt={3}>
-                  {/*La Tabla va aki */}
+                   <DataTable
+                      table={tablaUser}
+                      isSorted={false}
+                      entriesPerPage={false}
+                      showTotalEntries={false}
+                      noEndBorder
+                  />
                 </MDBox>
               </Card>
             </Grid>

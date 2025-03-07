@@ -5,7 +5,7 @@ import MDButton from 'components/MDButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export const TablaCalculo = ({ users, onEditar, onEliminar }) => {
+export const TablaUser= ({ users, onEditar, onEliminar }) => {
   const columns = [
     { Header: "#", accessor: "index", align: "left" },
     { Header: "Usuario", accessor: "usuario", align: "left" },
@@ -19,12 +19,12 @@ export const TablaCalculo = ({ users, onEditar, onEliminar }) => {
 
   const rows = Array.isArray(users) ? users.map((val, index) => ({
     index: index + 1,
+    usuario:val.user,
     fecha: val.fecha || "Sin fecha",
-    user:val.user,
-    name:val.name,
-    lastname:val.name,
+    nombre:val.name,
+    apellido:val.lastname,
     ci:val.ci,
-    email:val.email,
+    correo:val.email,
 
     acciones: (
       <MDBox display="flex" justifyContent="space-around">
@@ -41,8 +41,8 @@ export const TablaCalculo = ({ users, onEditar, onEliminar }) => {
   return { columns, rows };
 };
 
-TablaCalculo.propTypes = {
-  datos: PropTypes.array.isRequired,
+TablaUser.propTypes = {
+  users: PropTypes.array.isRequired,
   onEditar: PropTypes.func.isRequired,
   onEliminar: PropTypes.func.isRequired,
 };

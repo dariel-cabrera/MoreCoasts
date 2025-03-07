@@ -7,9 +7,13 @@ import Footer from "examples/Footer";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import { useState, useEffect } from "react";
-import CalculationTable from "./table";
+import { TablaCalculo } from "./table/dataTable";
 import CalculationService from "services/calculation-service";
 import { NuevoCalculo } from "./NuevoCalculo";
+import { eliminarDatos } from "./CalculationFunction";
+import { Card } from "@mui/material";
+import DataTable from "examples/Tables/DataTable";
+
 
 function Calculation() {
   const [calculo, setCalculo] = useState({
@@ -79,6 +83,12 @@ function Calculation() {
     setMstNvoCalc(true);
   };
 
+  const tablaCalculo = TablaCalculo({
+      datos: calculos,
+      onEditar: (val) => editarCalculos(val),
+      onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
+  });
+
   return (
     <DashboardLayout sx={{ width: "100%" }}>
       <DashboardNavbar />
@@ -99,21 +109,40 @@ function Calculation() {
         />
       ) : (
         <>
-          <MDBox mt={2} mb={1} width="100%">
-            <MDButton variant="gradient" color="info" size="medium" onClick={handleNuevoCalculo}>
-              Nuevo
-            </MDButton>
-          </MDBox>
-          <MDBox width="100%" display="flex" justifyContent="center">
-            <MDBox width="100%">
-              <CalculationTable
-                datos={calculos}
-                getDatos={getDatos}
-                limpiarDatos={limpiarDatos}
-                editarCalculos={(val) => editarCalculos(val)}
-              />
-            </MDBox>
-          </MDBox>
+          <MDButton variant="gradient" color="info" size="medium" onClick={handleNuevoCalculo}>
+                        Nuevo
+          </MDButton>
+        <MDBox pt={6} pb={3}>
+          <Grid container spacing={6}>
+            <Grid item xs={12}>
+              <Card>
+                <MDBox
+                  mx={2}
+                  mt={-3}
+                  py={3}
+                  px={2}
+                  variant="gradient"
+                  bgColor="info"
+                  borderRadius="lg"
+                  coloredShadow="info"
+                >
+                  <MDTypography variant="h6" color="white">
+                  Cálculo Teórico del Transporte de Sedimentos
+                  </MDTypography>
+                </MDBox>
+                <MDBox pt={3}>
+                   <DataTable
+                      table={tablaCalculo}
+                      isSorted={false}
+                      entriesPerPage={false}
+                      showTotalEntries={false}
+                      noEndBorder
+                  />
+                </MDBox>
+              </Card>
+            </Grid>
+          </Grid>
+        </MDBox>
         </>
       )}
 
