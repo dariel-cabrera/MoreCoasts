@@ -20,13 +20,15 @@ import ResetPassword from "auth/reset-password";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
+import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const routes = [
   {
     type: "collapse",
     name: "Inicio",
     key: "dashboard",
-    icon: <Icon fontSize="small">Inicio</Icon>,
+    icon: <HomeOutlinedIcon fontSize={"small"} />,
     route: "/dashboard",
     component: <Dashboard />,
   },
@@ -34,7 +36,7 @@ const routes = [
     type: "collapse",
     name: "Calculation",
     key: "calculation",
-    icon: <Icon fontSize="small">Cálculo</Icon>,
+    icon: <CalculateOutlinedIcon fontSize={"small"} />,
     route: "/calculation",
     component: <Calculation />,
   }, 
