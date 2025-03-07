@@ -21,3 +21,4 @@ class UsersService{
             return await HttpService.post(url,datos)
     }
 }
+export default new UsersService();

@@ -1,0 +1,48 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import MDBox from 'components/MDBox';
+import MDButton from 'components/MDButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+export const TablaCalculo = ({ users, onEditar, onEliminar }) => {
+  const columns = [
+    { Header: "#", accessor: "index", align: "left" },
+    { Header: "Usuario", accessor: "usuario", align: "left" },
+    { Header: "Fecha", accessor: "fecha", align: "left" },
+    { Header: "Nombre", accessor: "nombre", align: "left" },
+    { Header: "Apellido", accessor: "apellido", align: "left" },
+    { Header: "Carnet de Identidad", accessor: "CI", align: "left" },
+    { Header: "Correo", accessor: "correo", align: "left" },
+    { Header: "Acciones", accessor: "acciones", align: "center" },
+  ];
+
+  const rows = Array.isArray(users) ? users.map((val, index) => ({
+    index: index + 1,
+    fecha: val.fecha || "Sin fecha",
+    user:val.user,
+    name:val.name,
+    lastname:val.name,
+    ci:val.ci,
+    email:val.email,
+
+    acciones: (
+      <MDBox display="flex" justifyContent="space-around">
+        <MDButton variant="gradient" color="info" size="small" onClick={() => onEditar(val)}>
+          <EditIcon />
+        </MDButton>
+        <MDButton variant="gradient" color="error" size="small" onClick={() => onEliminar(val._id)}>
+         <DeleteIcon />
+        </MDButton>
+      </MDBox>
+    )
+  })) : [];
+
+  return { columns, rows };
+};
+
+TablaCalculo.propTypes = {
+  datos: PropTypes.array.isRequired,
+  onEditar: PropTypes.func.isRequired,
+  onEliminar: PropTypes.func.isRequired,
+};
