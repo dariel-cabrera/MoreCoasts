@@ -3,6 +3,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
+import { actualizarDatos,crearDatos} from "./UserFunction";
 
 export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
   // Función para manejar los cambios en los inputs
@@ -50,7 +51,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
             {editar ? (
               <>
                 <Grid item>
-                  <MDButton variant="gradient" color="warning" size="medium">
+                  <MDButton variant="gradient" color="warning" size="medium" onClick={()=>actualizarDatos({user,getDatos,limpiarDatos})}>
                     Actualizar
                   </MDButton>
                 </Grid>
@@ -60,7 +61,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
                   </MDButton>
                 </Grid>
                 <Grid item>
-                  <MDButton variant="gradient" color="info" size="medium">
+                  <MDButton variant="gradient" color="info" size="medium" onClick={()=>crearDatos({user,getDatos,limpiarDatos})}>
                     Nuevo
                   </MDButton>
                 </Grid>
@@ -68,7 +69,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
             ) : (
               <>
                 <Grid item>
-                  <MDButton variant="gradient" color="info" size="medium">
+                  <MDButton variant="gradient" color="info" size="medium" onClick={()=>crearDatos({user,getDatos,limpiarDatos})}>
                     Aceptar
                   </MDButton>
                 </Grid>

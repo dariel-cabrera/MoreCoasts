@@ -74,7 +74,7 @@ function Users(){
     const tablaUser = TablaUser({
         users:users,
         onEditar: (val) => editarUsers(val),
-        //onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
+        onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
     });
     return (
         <DashboardLayout>

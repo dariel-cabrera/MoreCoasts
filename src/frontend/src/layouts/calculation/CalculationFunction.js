@@ -1,9 +1,9 @@
 import Swal from 'sweetalert2';
 import { eliminar, actualizar, crear } from './CalculationHttp';
-import CalculationService from 'services/calculation-service';
+
 
 // Función para eliminar datos
-export const eliminar = async ({ idValue, getDatos, limpiarDatos }) => {
+export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -24,7 +24,7 @@ export const eliminar = async ({ idValue, getDatos, limpiarDatos }) => {
 
   if (result.isConfirmed) {
     try {
-      await CalculationService.deleteCalculation(idValue); 
+      await eliminar(idValue); 
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
