@@ -3,7 +3,7 @@ import { eliminar, actualizar, crear } from './CalculationHttp';
 import CalculationService from 'services/calculation-service';
 
 // Función para eliminar datos
-export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
+export const eliminar = async ({ idValue, getDatos, limpiarDatos }) => {
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",

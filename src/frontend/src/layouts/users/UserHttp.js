@@ -1,0 +1,52 @@
+import UsersService from "services/user-service";
+
+export const eliminar = async (id) =>{
+    try {
+            const response = await UsersService.deleteUsers(id)
+            console.log('Registro eliminado exitosamente:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error al eliminar el registro:', error.response?.data || error.message);
+            throw error;
+    }
+}
+
+export const actualizar = async(
+    id,
+    user,
+    name,
+    lastname,
+    email,
+)=>{
+    const data = {user,name,lastname,email}
+    try {
+           const response = await UsersService.updateUsers(id, data);
+           console.log('Datos actualizados exitosamente:', response.data);
+           return response.data;
+       } catch (error) {
+           console.error('Error al actualizar los datos:', error.response?.data || error.message);
+           throw error;
+    }
+}
+
+export const crear = async (
+   user,
+   name,
+   lastname,
+   email,
+   password,
+   ci,
+   
+) => {
+   
+    const data = {user,name,lastname,email,password};
+
+    try {
+        const response = await CalculationService.postCalculation(data);
+        console.log('Datos creados exitosamente:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error al crear los datos:', error.response?.data || error.message);
+        throw error;
+    }
+};
