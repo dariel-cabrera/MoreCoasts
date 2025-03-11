@@ -3,7 +3,7 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
-import { actualizarDatos,crearDatos} from "./UserFunction";
+import { actualizarDatos, crearDatos } from "./UserFunction";
 
 export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
   // Función para manejar los cambios en los inputs
@@ -18,17 +18,21 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
     <MDBox sx={{ pl: 2 }}>
       <Grid container direction="column">
         <MDTypography variant="h5" fontWeight="medium" color="black" mt={1} mb={2}>
-          Nuevo Usuario
+          {editar ? "Editar Usuario" : "Nuevo Usuario"}
         </MDTypography>
 
         <Grid container spacing={2}>
           {[
-            { label: "Nombre de Usuario", name: "user" },
+            { label: "Nombre de Usuario", name: "user_name" },
             { label: "Correo", name: "email" },
             { label: "Nombre", name: "name" },
             { label: "Apellido", name: "lastname" },
-            { label: "Contraseña", name: "password" },
-            { label: "Carnet de Identidad", name: "ci" },
+            ...(!editar
+              ? [
+                  { label: "Contraseña", name: "password" },
+                  { label: "Carnet de Identidad", name: "ci" },
+                ]
+              : []),
           ].map((item, index) => (
             <Grid item xs={6} key={item.name}>
               <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
@@ -51,7 +55,12 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
             {editar ? (
               <>
                 <Grid item>
-                  <MDButton variant="gradient" color="warning" size="medium" onClick={()=>actualizarDatos({user,getDatos,limpiarDatos})}>
+                  <MDButton
+                    variant="gradient"
+                    color="warning"
+                    size="medium"
+                    onClick={() => actualizarDatos({ user, getDatos, limpiarDatos })}
+                  >
                     Actualizar
                   </MDButton>
                 </Grid>
@@ -61,7 +70,12 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
                   </MDButton>
                 </Grid>
                 <Grid item>
-                  <MDButton variant="gradient" color="info" size="medium" onClick={()=>crearDatos({user,getDatos,limpiarDatos})}>
+                  <MDButton
+                    variant="gradient"
+                    color="info"
+                    size="medium"
+                    onClick={() => crearDatos({ user, getDatos, limpiarDatos })}
+                  >
                     Nuevo
                   </MDButton>
                 </Grid>
@@ -69,7 +83,12 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
             ) : (
               <>
                 <Grid item>
-                  <MDButton variant="gradient" color="info" size="medium" onClick={()=>crearDatos({user,getDatos,limpiarDatos})}>
+                  <MDButton
+                    variant="gradient"
+                    color="info"
+                    size="medium"
+                    onClick={() => crearDatos({ user, getDatos, limpiarDatos })}
+                  >
                     Aceptar
                   </MDButton>
                 </Grid>

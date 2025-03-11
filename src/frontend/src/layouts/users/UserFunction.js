@@ -50,7 +50,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 
 // Función para actualizar datos
 export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
-  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
+  const { user,name,lastname,email} = user;
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {

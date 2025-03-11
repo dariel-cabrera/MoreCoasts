@@ -17,7 +17,7 @@ function Users(){
     const [user,setUser]=useState({
         name:"",
         lastname:"",
-        user:"",
+        user_name:"",
         email:"",
         password:"",
         ci:"",
@@ -46,7 +46,7 @@ function Users(){
         setUser({
             name:"",
             apellido:"",
-            user:"",
+            user_name:"",
             email:"",
             password:"",
             ci:""
@@ -62,7 +62,7 @@ function Users(){
         setUser({
           name:val.name,
           lastname:val.lastname,
-          user:val.user,
+          user_name:val.user,
           email:val.email,
         });
     };
