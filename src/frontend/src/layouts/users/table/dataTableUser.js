@@ -12,7 +12,7 @@ export const TablaUser= ({ users, onEditar, onEliminar }) => {
     { Header: "Fecha", accessor: "fecha", align: "left" },
     { Header: "Nombre", accessor: "nombre", align: "left" },
     { Header: "Apellido", accessor: "apellido", align: "left" },
-    { Header: "Carnet de Identidad", accessor: "CI", align: "left" },
+    { Header: "Carnet de Identidad", accessor: "ci", align: "left" },
     { Header: "Correo", accessor: "correo", align: "left" },
     { Header: "Acciones", accessor: "acciones", align: "center" },
   ];

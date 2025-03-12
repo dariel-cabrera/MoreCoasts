@@ -1,9 +1,10 @@
 import Swal from 'sweetalert2';
 import { eliminar, actualizar, crear } from './UserHttp';
-import CalculationService from 'services/calculation-service';
+
 
 // Función para eliminar datos
 export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
+  console.log(idValue);
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -50,7 +51,8 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 
 // Función para actualizar datos
 export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
-  const { user,name,lastname,email} = user;
+  console.log(id,user);
+  const { user_name,name,lastname,email} = user;
 
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -72,7 +74,7 @@ export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
 
   if (result.isConfirmed) {
     try {
-      await actualizar(id, densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+      await actualizar(id,user_name,name,lastname,email);
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
@@ -98,29 +100,27 @@ export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
 
 // Función para calcular y crear datos
 export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
-  if (!calculo) {
-    console.error("calculo is undefined");
-    return;
-  }
+  console.log(user);
+  
 
-  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
+  const { user_name,name,lastname,email,password,ci}= user;
 
-  if (!densidad_a || !densidad_m || !indice || !coeficiente || !altura || !angulo || !aceleracion || !P) {
+  if (!user_name || !name || !lastname || !email || !password || !ci) {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Por favor, complete todos los campos antes de calcular.'
+      text: 'Por favor, complete todos los campos antes de crear.'
     });
     return;
   }
 
   try {
-    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+    await crear(user_name,name,lastname,email,password,ci);
     await getDatos();
     Swal.fire({
       position: "top-end",
       icon: "success",
-      title: "Datos calculados con éxito",
+      title: "Usuario Creado con éxito",
       showConfirmButton: false,
       timer: 1500
     });
@@ -129,7 +129,7 @@ export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Hubo un problema al calcular los datos.'
+      text: 'Hubo un problema al crear el usuario.'
     });
   }
 };

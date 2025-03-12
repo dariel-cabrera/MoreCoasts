@@ -5,13 +5,22 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })  // ✅ Agrega createdAt y updatedAt automáticamente
 export class User {
   @Prop({ required: true })
+  user_name: string;
+
+  @Prop({ required: true })
   name: string;
+
+  @Prop({ required: true })
+  lastname: string;
 
   @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true })
   password: string;
+
+  @Prop({ required: true })
+  ci: number;
 
   @Prop()
   profile_image: string;

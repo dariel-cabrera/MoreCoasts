@@ -5,12 +5,13 @@ import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 import { actualizarDatos, crearDatos } from "./UserFunction";
 
-export const NewUser = ({ user, setUser, limpiarDatos, editar }) => {
+export const NewUser = ({ user, setUser, limpiarDatos, editar,getDatos}) => {
   // Función para manejar los cambios en los inputs
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setUser((prevUser) => ({
       ...prevUser,
-      [e.target.name]: e.target.value,
+      [name]: name === "ci" ? Number(value) : value,
     }));
   };
 

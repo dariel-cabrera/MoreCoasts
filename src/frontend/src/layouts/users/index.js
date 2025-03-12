@@ -90,6 +90,7 @@ function Users(){
                setUser={setUser}
                limpiarDatos={limpiarDatos}
                editar={editar}
+               getDatos={getDatos}
             
             />
 

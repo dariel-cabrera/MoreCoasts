@@ -30,7 +30,7 @@ export const actualizar = async(
 }
 
 export const crear = async (
-   user,
+   user_name,
    name,
    lastname,
    email,
@@ -39,10 +39,10 @@ export const crear = async (
    
 ) => {
    
-    const data = {user,name,lastname,email,password};
+    const data = {user_name,name,lastname,email,password,ci};
 
     try {
-        const response = await CalculationService.postCalculation(data);
+        const response = await UsersService.postUsers(data);
         console.log('Datos creados exitosamente:', response.data);
         return response.data;
     } catch (error) {
