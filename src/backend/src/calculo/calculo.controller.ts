@@ -1,32 +1,80 @@
-import { Body, Controller, Delete, Get, Post, Put } from '@nestjs/common';
-import { CalculoService } from './calculo.service';
-import { CreateCalculoDto } from './dto/create-Calculo.dto';
+import { Body, Controller, Delete, Get, Post, Put,Param } from '@nestjs/common';
+import { CalculoService } from "./calculo.service";
+import { CreateCalculoDto } from './dto/createCalculo.dto';
+import { UpdateCalculoDto } from './dto/updateCalculo.dto';
 
-@Controller('calculo')
+@Controller()
 export class CalculoController {
       calculoService: CalculoService;
       constructor(calculoService: CalculoService){
         this.calculoService= calculoService;
       }
 
-      @Get('/mostrarCalculos')
-      getAllCalculos(){
+      @Get('/calculo')
+      async getAllCalculos(){
         return this.calculoService.getCalculo();
       }
 
-      @Post('/crearCalculos')
-      createCalculos(@Body() calculo:CreateCalculoDto){
-        return this.calculoService.createCalculo(calculo);
+      @Post('/calculo')
+      async createCalculos(@Body() calculo: CreateCalculoDto){
+        const {
+          densidad_a,
+          densidad_m,
+          indice,
+          coeficiente,
+          altura,
+          angulo,
+          aceleracion,
+          Q,
+          P,
+          K,
+        } = calculo;
+        return this.calculoService.createCalculo(
+          densidad_a,
+          densidad_m,
+          indice,
+          coeficiente,
+          altura,
+          angulo,
+          aceleracion,
+          Q,
+          P,
+          K,
+        );
+      }
+      @Put('/calculo/:id')
+      async updateCalculos(@Param('id') id:string, @Body() calculo:UpdateCalculoDto){
+        const {
+          densidad_a,
+          densidad_m,
+          indice,
+          coeficiente,
+          altura,
+          angulo,
+          aceleracion,
+          Q,
+          P,
+          K,
+        } = calculo;
+        return this.calculoService.updateCalculo(
+          id,
+          densidad_a,
+          densidad_m,
+          indice,
+          coeficiente,
+          altura,
+          angulo,
+          aceleracion,
+          Q,
+          P,
+          K,
+        );
       }
 
-      @Put('/actualizarCalculos')
-      updateCalculos(){
-        return this.calculoService.updateCalculo();
-      }
+     
 
-      @Delete('/eliminarCalculos')
-      deleteCalculos(){
-        return this.calculoService.deleteCalculo();
+      @Delete('/calculo/:id')
+      async deleteCalculos(@Param('id') id: string){
+        return this.calculoService.deleteCalculo(id);
       }
-
-}
+	}

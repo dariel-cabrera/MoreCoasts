@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { TablaCalculo } from './components/TablaCalculo';
@@ -27,8 +26,9 @@ function App() {
 
   const getDatos = async () => {
     try {
-      const respuesta = await axios.get("http://localhost:3001/mostrar");
-      setCalculos(respuesta.data);
+      const respuesta = fetch("http://localhost:3001/calculo");
+      const datos = await respuesta.json();
+      setCalculos(datos);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }

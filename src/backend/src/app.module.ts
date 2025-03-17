@@ -1,16 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CalculoModuleModule } from './calculo-module/calculo-module.module';
 import { CalculoModule } from './calculo/calculo.module';
-import { CalculoController } from './auth/calculo/calculo.controller';
-import { CalculoController } from './–no-spec/calculo/calculo.controller';
-import { CalculoController } from './–no-spec/calculo/calculo.controller';
-import { CalculoController } from './–no-spec/calculo/calculo.controller';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [CalculoModuleModule, CalculoModule],
-  controllers: [AppController, CalculoController],
-  providers: [AppService],
+  imports: [CalculoModule,
+   MongooseModule.forRoot("mongodb://localhost:27017/MoreCoast")
+  ],
+  
 })
 export class AppModule {}
