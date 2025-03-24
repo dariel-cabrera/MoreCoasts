@@ -16,8 +16,8 @@ export class CreateUserDto {
   @IsString()
   readonly password: string;
 
-  @IsNumber()
-  readonly ci:number;
+  @IsString()
+  readonly ci:string;
 }
 
 export class UpdateUserDto {
@@ -26,10 +26,16 @@ export class UpdateUserDto {
   readonly name?: string;
 
   @IsOptional()
-  @IsEmail()
-  readonly email?: string;
+  @IsString()
+  readonly user_name?: string;
 
   @IsOptional()
   @IsString()
-  readonly password?: string;
+  readonly lastname?: string;
+
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
+
+  
 }

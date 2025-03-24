@@ -50,10 +50,10 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 };
 
 // Función para actualizar datos
-export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
+export const actualizarDatos = async ({ user, getDatos, limpiarDatos }) => {
+  
+  const { id, user_name,name,lastname,email} = user;
   console.log(id,user);
-  const { user_name,name,lastname,email} = user;
-
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -101,8 +101,6 @@ export const actualizarDatos = async ({ id, user, getDatos, limpiarDatos }) => {
 // Función para calcular y crear datos
 export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
   console.log(user);
-  
-
   const { user_name,name,lastname,email,password,ci}= user;
 
   if (!user_name || !name || !lastname || !email || !password || !ci) {

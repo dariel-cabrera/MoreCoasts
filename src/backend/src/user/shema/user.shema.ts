@@ -20,7 +20,7 @@ export class User {
   password: string;
 
   @Prop({ required: true })
-  ci: number;
+  ci:string;
 
   @Prop()
   profile_image: string;

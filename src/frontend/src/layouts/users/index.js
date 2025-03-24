@@ -12,6 +12,7 @@ import { Grid,Card } from "@mui/material";
 import { NewUser } from "./newUser";
 import { TablaUser } from "./table/dataTableUser";
 import DataTable from "examples/Tables/DataTable";
+import { eliminarDatos } from "./UserFunction";
 
 function Users(){
     const [user,setUser]=useState({
@@ -62,8 +63,9 @@ function Users(){
         setUser({
           name:val.name,
           lastname:val.lastname,
-          user_name:val.user,
+          user_name:val.user_name,
           email:val.email,
+          id:val._id
         });
     };
 
@@ -74,7 +76,7 @@ function Users(){
     const tablaUser = TablaUser({
         users:users,
         onEditar: (val) => editarUsers(val),
-        onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
+        onEliminar: (id) => eliminarDatos({ idValue: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
     });
     return (
         <DashboardLayout>

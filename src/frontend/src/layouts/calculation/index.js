@@ -86,7 +86,7 @@ function Calculation() {
   const tablaCalculo = TablaCalculo({
       datos: calculos,
       onEditar: (val) => editarCalculos(val),
-      onEliminar: (id) => eliminarDatos({ id: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
+      onEliminar: (id) => eliminarDatos({ idValue: id, getDatos: getDatos, limpiarDatos: limpiarDatos }),
   });
 
   return (

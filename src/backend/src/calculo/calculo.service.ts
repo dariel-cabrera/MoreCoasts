@@ -2,12 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { Calculation} from "./shema/datos.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class CalculoService{
   constructor(
     @InjectModel(Calculation.name) private readonly datosModel: Model<Calculation>,
   ) {}
+
+ 
 
   // Crear un nuevo registro
   async createCalculo(
@@ -81,4 +84,39 @@ export class CalculoService{
     return await this.datosModel.find().exec();
 
   }
+
+ 
+  /* async exportToExcel(): Promise<Buffer> {
+    try {
+      const calculations = await this.datosModel.find().exec();
+      console.log('Calculations:', calculations);
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Calculations');
+
+      worksheet.columns = [
+        { header: 'Densidad A', key: 'densidad_a', width: 30 },
+        { header: 'Densidad M', key: 'densidad_m', width: 30 },
+        { header: 'Índice', key: 'indice', width: 30 },
+        { header: 'Coeficiente', key: 'coeficiente', width: 30 },
+        { header: 'Altura', key: 'altura', width: 30 },
+        { header: 'Ángulo', key: 'angulo', width: 30 },
+        { header: 'Q', key: 'Q', width: 30 },
+        { header: 'P', key: 'P', width: 30 },
+        { header: 'K', key: 'K', width: 30 },
+      ];
+
+      calculations.forEach((calculation) => {
+        worksheet.addRow(calculation);
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      console.log('Buffer created');
+      return buffer;
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      throw error;
+    }
+  } */
+
 }

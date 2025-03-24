@@ -13,12 +13,12 @@ export const eliminar = async (id) =>{
 
 export const actualizar = async(
     id,
-    user,
+    user_name,
     name,
     lastname,
     email,
 )=>{
-    const data = {user,name,lastname,email}
+    const data = {user_name,name,lastname,email}
     try {
            const response = await UsersService.updateUsers(id, data);
            console.log('Datos actualizados exitosamente:', response.data);

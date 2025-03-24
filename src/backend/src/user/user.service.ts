@@ -32,12 +32,29 @@ export class UserService {
     return newUser.save();
   }
 
-  // Actualizar un usuario
-  async update(id: string, updateData: Partial<User>): Promise<User> {
-    const updatedUser = await this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
-    if (!updatedUser) throw new NotFoundException('User not found');
-    return updatedUser;
-  }
+
+   async update(
+      id: string,
+      user_name: string,
+      name: string,
+      last_name: string,
+      email: string,
+    
+    ): Promise<User> {
+      return await this.userModel.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            user_name,
+            name,
+            last_name,
+            email,
+          },
+        },
+        { new: true }, // Retornar el documento actualizado
+      );
+    }
+  
 
   // Eliminar un usuario
   async delete(id: string): Promise<void> {
