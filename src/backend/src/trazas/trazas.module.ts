@@ -11,6 +11,7 @@ import { Trazas, TrazasSchema } from "./shema/trazas.shema";
   ],
    controllers:[TrazasController],
    providers:[TrazasService],
+   exports:[TrazasService]
 })
 
 export class TrazasModule{}

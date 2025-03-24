@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from '../user/shema/user.shema';
 import { PasswordReset, PasswordResetSchema } from '../user/shema/password-reset.schema';
-
+import { TrazasModule } from 'src/trazas/trazas.module';
 @Module({
   imports: [
     ConfigModule,
@@ -19,6 +19,7 @@ import { PasswordReset, PasswordResetSchema } from '../user/shema/password-reset
       { name: User.name, schema: UserSchema },
       { name: PasswordReset.name, schema: PasswordResetSchema },
     ]),
+    TrazasModule
   ],
   controllers: [AuthController],
   providers: [AuthService],

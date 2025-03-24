@@ -17,12 +17,11 @@ export class TrazasService{
   async createTrazas (
     user_name:string,
     accion:string,
-    fecha:Date,
   ): Promise<Trazas>{
     const nuevoDato= new this.datosModel({
         user_name,
         accion,
-        fecha
+        fecha: new Date(),
     });
     return await nuevoDato.save();
   }
@@ -32,4 +31,7 @@ export class TrazasService{
   async deleteTrazas(id: string): Promise<any> {
     return await this.datosModel.deleteOne({ _id: id });
   }
+
+  
+
 }

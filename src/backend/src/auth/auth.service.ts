@@ -9,6 +9,7 @@ import * as randomToken from 'random-token';
 
 import { User } from 'src/user/shema/user.shema';
 import { PasswordReset, PasswordResetDocument } from '../user/shema/password-reset.schema';
+import { TrazasService } from 'src/trazas/trazas.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(PasswordReset.name) private readonly passwordResetModel: Model<PasswordResetDocument>,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly trazasService:TrazasService
   ) {
     // Configuración del transportador de nodemailer
     this.transporter = nodemailer.createTransport({
@@ -41,7 +43,11 @@ export class AuthService {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
+      console.log(user.password)
       throw new HttpException('Contraseña incorrecta', HttpStatus.UNAUTHORIZED);
+    }
+    else{
+        await this.trazasService.createTrazas(user.name,`${user.name} Se ha autenticado`)
     }
 
     // Generar token JWT

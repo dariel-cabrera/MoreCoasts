@@ -14,11 +14,7 @@ export class TrazasController {
             return this.trazasService.getTrazas();
     }
 
-    @Post('postTrazas')
-      async postTrazas(@Body() trazas:TrazasCreateDto){
-        const {user_name , accion, fecha}=trazas
-          return this.trazasService.createTrazas(user_name,accion,fecha);
-    }
+   
 
     @Delete('deleteTrazas/:id')
       async deleteTrazas(@Param('id') id:string){
