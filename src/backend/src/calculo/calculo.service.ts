@@ -1,13 +1,17 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable,HttpException,HttpStatus } from "@nestjs/common";
 import { Calculation} from "./shema/datos.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import * as ExcelJS from 'exceljs';
+import { TrazasService } from 'src/trazas/trazas.service';
+
 
 @Injectable()
 export class CalculoService{
   constructor(
     @InjectModel(Calculation.name) private readonly datosModel: Model<Calculation>,
+    
+    private readonly trazasService:TrazasService,
   ) {}
 
  
@@ -24,6 +28,7 @@ export class CalculoService{
     Q: number,
     P: number,
     K: number,
+    idUser:string
   ): Promise<Calculation> {
     const nuevoDato = new this.datosModel({
       densidad_a,
@@ -36,7 +41,9 @@ export class CalculoService{
       Q,
       P,
       K,
+      idUser
     });
+    await this.trazasService.createTrazas(idUser,`Realizó un Nuevo Calculo`)
     return await nuevoDato.save();
   }
 
@@ -53,7 +60,9 @@ export class CalculoService{
     Q: number,
     P: number,
     K: number,
+    idUser:string
   ): Promise<Calculation> {
+    await this.trazasService.createTrazas(idUser,`Realizó una actualizacion de un Cálculo`)
     return await this.datosModel.findByIdAndUpdate(
       id,
       {
@@ -70,13 +79,23 @@ export class CalculoService{
           K,
         },
       },
+    
       { new: true }, // Retornar el documento actualizado
     );
+    
   }
 
   // Eliminar un registro
-  async deleteCalculo(id: string): Promise<any> {
-    return await this.datosModel.deleteOne({ _id: id });
+  async deleteCalculo(_id: string,idUser:string): Promise<any> {
+    const dato = await this.datosModel.findOne({ _id});
+    if(!dato){
+       throw new HttpException('Calculo no encontrado', HttpStatus.UNAUTHORIZED);
+    }
+    else{
+      await this.trazasService.createTrazas(idUser,`Elimino un Calculo`)
+      return await this.datosModel.deleteOne({ _id});
+    }
+    
   }
 
   // Obtener todos los registros

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from "class-validator"
+import { IsNotEmpty, IsNumber, IsString} from "class-validator"
 
 export class UpdateCalculoDto{
     @IsNumber()
@@ -41,4 +41,8 @@ export class UpdateCalculoDto{
     @IsNumber()
     @IsNotEmpty()
     K:number
+
+    @IsString()
+    @IsNotEmpty()
+    idUser:string
 }

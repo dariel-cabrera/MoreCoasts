@@ -28,6 +28,8 @@ import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
+import { obtenerUsuarioSist } from "layouts/calculation/CalculationFunction";
+import { Email } from "@mui/icons-material";
 
 function Login() {
   const authContext = useContext(AuthContext);
@@ -88,6 +90,7 @@ function Login() {
     try {
       const response = await AuthService.login(myData);
       authContext.login(response.access_token, response.refresh_token);
+      obtenerUsuarioSist(response.id)
     } catch (res) {
       console.error("Error en el login:", res);
     

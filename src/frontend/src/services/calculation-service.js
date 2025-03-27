@@ -6,9 +6,9 @@ class  CalculationService {
         return await HttpService.get(url);
     };
 
-    deleteCalculation=async(id)=>{
+    deleteCalculation=async(id,idUser)=>{
         const url="deleteCalculation";
-        return await HttpService.delete(`${url}/${id}`)
+        return await HttpService.delete(`${url}/${id}`,idUser)
     };
     
     updateCalculation=async(id,datos)=>{

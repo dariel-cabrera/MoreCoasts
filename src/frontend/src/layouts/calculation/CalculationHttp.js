@@ -2,9 +2,9 @@ import CalculationService from "services/calculation-service";
 import { calculando_K, calculando_Q } from "./ecuaciones/calculoTeorico";
 
 // Función para eliminar un registro por su ID
-export const eliminar = async (id) => {
+export const eliminar = async (id,idUser) => {
     try {
-        const response = await CalculationService.deleteCalculation(id);
+        const response = await CalculationService.deleteCalculation(id,idUser);
         console.log('Registro eliminado exitosamente:', response.data);
         return response.data;
     } catch (error) {
@@ -23,7 +23,8 @@ export const actualizar = async (
     altura,
     angulo,
     aceleracion, 
-    P
+    P,
+    idUser
 ) => {
     const Q = calculando_Q(denArena, denMar, indice, coeficiente, altura, angulo, aceleracion);
     const K = calculando_K(P, Q);
@@ -39,6 +40,7 @@ export const actualizar = async (
         P,
         Q,
         K,
+        idUser
     };
 
     try {
@@ -60,7 +62,8 @@ export const crear = async (
     altura,
     angulo,
     aceleracion,
-    P
+    P,
+    usuarioSist
 ) => {
     const Q = calculando_Q(denArena, denMar, indice, coeficiente, altura, angulo, aceleracion);
     const K = calculando_K(P, Q);
@@ -76,6 +79,7 @@ export const crear = async (
         P,
         Q,
         K,
+        idUser
     };
 
     try {

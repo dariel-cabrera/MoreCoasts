@@ -47,14 +47,15 @@ export class AuthService {
       throw new HttpException('Contraseña incorrecta', HttpStatus.UNAUTHORIZED);
     }
     else{
-        await this.trazasService.createTrazas(user.name,`${user.name} Se ha autenticado`)
+        await this.trazasService.createTrazas(user._id,` Se ha autenticado`)
     }
 
     // Generar token JWT
-    const payload = { id: user.id, email: user.email };
+    const payload = { id: user._id, email: user.email };
     const token = this.jwtService.sign(payload);
 
     return {
+      id:user._id,
       token_type: 'Bearer',
       expires_in: '24h',
       access_token: token,
