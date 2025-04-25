@@ -41,9 +41,9 @@ export class CalculoService{
       Q,
       P,
       K,
-      idUser
+     
     });
-    await this.trazasService.createTrazas(idUser,`Realizó un Nuevo Calculo`)
+    this.trazasService.createTrazas('Ha realizado un cálculo',idUser)
     return await nuevoDato.save();
   }
 
@@ -60,9 +60,9 @@ export class CalculoService{
     Q: number,
     P: number,
     K: number,
-    idUser:string
+    idUser:string,
   ): Promise<Calculation> {
-    await this.trazasService.createTrazas(idUser,`Realizó una actualizacion de un Cálculo`)
+    this.trazasService.createTrazas('Ha actualizado un Cálculo',idUser)
     return await this.datosModel.findByIdAndUpdate(
       id,
       {
@@ -79,20 +79,20 @@ export class CalculoService{
           K,
         },
       },
-    
+      
       { new: true }, // Retornar el documento actualizado
     );
     
   }
 
   // Eliminar un registro
-  async deleteCalculo(_id: string,idUser:string): Promise<any> {
+  async deleteCalculo(_id: string, idUser:string): Promise<any> {
     const dato = await this.datosModel.findOne({ _id});
     if(!dato){
        throw new HttpException('Calculo no encontrado', HttpStatus.UNAUTHORIZED);
     }
     else{
-      await this.trazasService.createTrazas(idUser,`Elimino un Calculo`)
+      this.trazasService.createTrazas('Ha eliminado un cálculo',idUser)
       return await this.datosModel.deleteOne({ _id});
     }
     

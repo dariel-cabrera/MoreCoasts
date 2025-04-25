@@ -1,15 +1,15 @@
 import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ReseedAction } from './reseed-action';
-
+import { SeedService } from './admin.seeder';
+import { UserModule } from 'src/user/user.module';
 
 
 @Global()
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URI), 
+    UserModule
   ],
-  providers: [ReseedAction],
-  exports: [MongooseModule],
+  providers: [SeedService],
+ 
 })
 export class DatabaseModule {}

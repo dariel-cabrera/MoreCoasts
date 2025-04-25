@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './shema/user.shema';
+import * as bcrypt from 'bcrypt';
 import { PasswordReset, PasswordResetDocument } from './shema/password-reset.schema';
+import { isEmail } from 'class-validator';
+
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(PasswordReset.name) private passwordResetModel: Model<PasswordResetDocument>,
+    
   ) {}
 
   /*** 🚀 FUNCIONES DE USUARIO 🚀 ***/
@@ -28,9 +32,61 @@ export class UserService {
 
   // Crear un nuevo usuario
   async create(userData: Partial<User>): Promise<User> {
-    const newUser = new this.userModel(userData);
+    const { name, user_name, lastname, email, password, ci } = userData;
+
+    // Validar campos obligatorios
+    if (!name || !user_name || !lastname || !email || !password || !ci) {
+        throw new HttpException('Faltan campos obligatorios', HttpStatus.BAD_REQUEST);
+    }
+
+    // 2. Validar formatos
+    if (!isEmail(email)) {
+      throw new HttpException('Email inválido', HttpStatus.BAD_REQUEST);
+    }
+    if (!/^\d{11}$/.test(ci)) {
+      throw new HttpException('CI inválido', HttpStatus.BAD_REQUEST);
+    }
+    if (password.length < 8) {
+      throw new HttpException('La contraseña debe tener al menos 8 caracteres', HttpStatus.BAD_REQUEST);
+    }
+
+    // Verificar duplicados en una sola consulta
+    const existingUser = await this.userModel.findOne({
+        $or: [
+            { user_name },
+            { ci },
+            { email }
+        ]
+    });
+
+    if (existingUser) {
+        if (existingUser.user_name === user_name) {
+            throw new HttpException('El nombre de usuario ya está registrado', HttpStatus.CONFLICT);
+        }
+        if (existingUser.ci === ci) {
+            throw new HttpException('El CI ya está registrado', HttpStatus.CONFLICT);
+        }
+        if (existingUser.email === email) {
+            throw new HttpException('El email ya está registrado', HttpStatus.CONFLICT);
+        }
+    }
+
+    // Encriptar contraseña y guardar
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new this.userModel({
+        user_name,
+        name,
+        lastname,
+        ci,
+        email,
+        password: hashedPassword,
+        created_at: new Date()
+    });
+    
     return newUser.save();
-  }
+}
 
 
    async update(

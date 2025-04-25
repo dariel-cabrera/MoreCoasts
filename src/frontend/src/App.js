@@ -114,7 +114,7 @@ export default function App() {
   // Usa useEffect para verificar si la aplicación está en modo de demostración. 
   // Esto se hace comparando la variable de entorno REACT_APP_IS_DEMO con el valor "true".
   useEffect(() => {
-    setIsDemo(process.env.REACT_APP_IS_DEMO === "true");
+    setIsDemo(process.env.REACT_APP_IS_DEMO === "false");
   }, []);
 
   // Cache for the rtl
@@ -227,72 +227,6 @@ export default function App() {
 
   return (
     <>
-      {isDemo && (
-    /*  Condición isDemo: Si la aplicación
-     está en modo de demostración (isDemo es true), se renderiza el componente <Helmet>. </Helmet>
-    <Helmet>: Es un componente de la librería react-helmet que permite modificar el contenido de la etiqueta
-    <head> del documento HTML. Aquí se agregan metadatos para:
-    SEO: Palabras clave (keywords) y descripción (description).
-    Redes sociales: Metadatos para Twitter (twitter:card, twitter:title, etc.) y 
-    Facebook (og:title, og:image, etc.).
-    Imagen y URL: Se especifica una imagen y una URL para compartir en redes sociales. */
-        <Helmet>
-          <meta
-            name="keywords"
-            content="creative tim, updivision, material, node.js json:api, html dashboard, node.js, react, api admin, react node.js, html css dashboard node.js, material dashboard node.js, node.js api, react material dashboard, material admin, react dashboard, react admin, web dashboard, bootstrap 5 dashboard node.js, bootstrap 5, css3 dashboard, bootstrap 5 admin node.js, material dashboard bootstrap 5 node.js, frontend, api dashboard, responsive bootstrap 5 dashboard, api, material dashboard, material node.js bootstrap 5 dashboard, json:api"
-          />
-          <meta
-            name="description"
-            content="A free full stack app powered by MUI component library, React and Node.js API, featuring dozens of handcrafted UI elements"
-          />
-          <meta
-            itemProp="name"
-            content="Material Dashboard 2 React Node.js by Creative Tim & UPDIVISION"
-          />
-          <meta
-            itemProp="description"
-            content="A free full stack app powered by MUI component library, React and Node.js API, featuring dozens of handcrafted UI elements"
-          />
-          <meta
-            itemProp="image"
-            content="https://s3.amazonaws.com/creativetim_bucket/products/157/original/react-material-dashboard-nodejs.jpg?1664786816"
-          />
-          <meta name="twitter:card" content="product" />
-          <meta name="twitter:site" content="@creativetim" />
-          <meta
-            name="twitter:title"
-            content="Material Dashboard 2 React Node.js by Creative Tim & UPDIVISION"
-          />
-          <meta
-            name="twitter:description"
-            content="A free full stack app powered by MUI component library, React and Node.js API, featuring dozens of handcrafted UI elements"
-          />
-          <meta name="twitter:creator" content="@creativetim" />
-          <meta
-            name="twitter:image"
-            content="https://s3.amazonaws.com/creativetim_bucket/products/157/original/react-material-dashboard-nodejs.jpg?1664786816"
-          />
-          <meta property="fb:app_id" content="655968634437471" />
-          <meta
-            property="og:title"
-            content="Material Dashboard 2 React Node.js by Creative Tim & UPDIVISION"
-          />
-          <meta property="og:type" content="article" />
-          <meta
-            property="og:url"
-            content="https://www.creative-tim.com/live/react-material-dashboard-node.js/"
-          />
-          <meta
-            property="og:image"
-            content="https://s3.amazonaws.com/creativetim_bucket/products/157/original/react-material-dashboard-nodejs.jpg?1664786816"
-          />
-          <meta
-            property="og:description"
-            content="A free full stack app powered by MUI component library, React and Node.js API, featuring dozens of handcrafted UI elements"
-          />
-          <meta property="og:site_name" content="Creative Tim" />
-        </Helmet>
-      )}
 
       {/*  Condición direction === "rtl": Si la dirección del texto es de derecha a izquierda (RTL), 
       se renderiza la interfaz con estilos RTL.
@@ -308,7 +242,7 @@ export default function App() {
                 <Sidenav
                   color={sidenavColor}
                   brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                  brandName="Material Dashboard 2"
+                  brandName="MoreCoast"
                   routes={routes}
                   onMouseEnter={handleOnMouseEnter}
                   onMouseLeave={handleOnMouseLeave}
@@ -323,7 +257,7 @@ export default function App() {
               <Route path="register" element={<Navigate to="/auth/register" />} />
               <Route path="forgot-password" element={<Navigate to="/auth/forgot-password" />} />
               {getRoutes(routes)}
-              <Route path="*" element={<Navigate to="/dashboard" />} />
+              <Route path="*" element={<Navigate to="/auth/login" />} />
             </Routes>
           </ThemeProvider>
         </CacheProvider>
@@ -381,7 +315,7 @@ export default function App() {
               key="user-management"
             />
             {getRoutes(routes)}
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/auth/login" />} />
           </Routes>
         </ThemeProvider>
       )}

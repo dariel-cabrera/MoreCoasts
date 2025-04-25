@@ -3,6 +3,7 @@
 import Dashboard from "layouts/dashboard";
 import Calculation from "layouts/calculation";
 import Users from "layouts/users";
+import Trazas from "layouts/trazas";
 import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
@@ -26,6 +27,14 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const routes = [
   {
+    type: "auth",
+    name: "Login",
+    key: "login",
+    icon: <Icon fontSize="small">login</Icon>,
+    route: "/auth/login",
+    component: <Login />,
+  },
+  {
     type: "collapse",
     name: "Inicio",
     key: "dashboard",
@@ -48,6 +57,14 @@ const routes = [
     icon:<Icon fontSize="small">user</Icon>,
     route:"/users",
     component:<Users />,
+   },
+   {
+    type:"collapse",
+    name:"Trazas",
+    key:"trazas",
+    icon:<Icon fontSize="small">user</Icon>,
+    route:"/trazas",
+    component:<Trazas />,
    },
   {
     type: "collapse",
@@ -94,8 +111,8 @@ const routes = [
     name: "Sign In",
     key: "sign-in",
     icon: <Icon fontSize="small">login</Icon>,
-    route: "/authentication/sign-in",
-    component: <SignIn />,
+    route: "/auth/login",
+    component: <Login />,
   },
   {
     type: "examples",
@@ -118,17 +135,10 @@ const routes = [
     name: "Sign Up",
     key: "sign-up",
     icon: <Icon fontSize="small">assignment</Icon>,
-    route: "/authentication/sign-up",
-    component: <SignUp />,
-  },
-  {
-    type: "auth",
-    name: "Login",
-    key: "login",
-    icon: <Icon fontSize="small">login</Icon>,
     route: "/auth/login",
     component: <Login />,
   },
+  
   {
     type: "auth",
     name: "Register",

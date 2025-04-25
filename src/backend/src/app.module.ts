@@ -4,16 +4,22 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TrazasModule } from './trazas/trazas.module';
+import { DatabaseModule } from './shared/database/database.module';
+import { UbicacionModule } from './ubicacion/ubicacion.module';
 import * as dotenv from 'dotenv';
-
+import { SeedService } from './shared/database/admin.seeder';
 dotenv.config();
 @Module({
-  imports: [CalculoModule,
+  imports: [
+   DatabaseModule,
+   CalculoModule,
    AuthModule,
    UserModule,
    TrazasModule,
+   UbicacionModule,
    MongooseModule.forRoot(process.env.MONGO_URI),
   ],
+  providers: [SeedService],
   
 })
 export class AppModule {}

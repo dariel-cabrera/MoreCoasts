@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, Put} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './shema/user.shema';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+
 
 @Controller()
 export class UserController {
@@ -19,6 +20,7 @@ export class UserController {
     return this.userService.findOneById(id);
   }
 
+  
   // Crear un nuevo usuario
   @Post('postUsers')
   async createUser(@Body() userData: CreateUserDto): Promise<User> {

@@ -1,12 +1,7 @@
 import Swal from 'sweetalert2';
 import { eliminar, actualizar, crear } from './CalculationHttp';
-import { useState} from "react";
 
-const[usuarioSist,setUsuarioSist]=useState("");
 
-export const obteneridUsuario = async ({id})=>{
-    return await setUsuarioSist(id);
-}
 
 // Función para eliminar datos
 export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
@@ -30,7 +25,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 
   if (result.isConfirmed) {
     try {
-      await eliminar(idValue,usuarioSist); 
+      await eliminar(idValue); 
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
@@ -78,7 +73,7 @@ export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) =
 
   if (result.isConfirmed) {
     try {
-      await actualizar(id, densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,usuarioSist);
+      await actualizar(id, densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
@@ -121,7 +116,7 @@ export const calcularDatos = async ({ calculo, getDatos, limpiarDatos }) => {
   }
 
   try {
-    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,usuarioSist);
+    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
     await getDatos();
     Swal.fire({
       position: "top-end",

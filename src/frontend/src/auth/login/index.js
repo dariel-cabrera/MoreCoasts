@@ -28,23 +28,21 @@ import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
-import { obtenerUsuarioSist } from "layouts/calculation/CalculationFunction";
+import DataTrazas from "layouts/trazas/DataTrazas";
 import { Email } from "@mui/icons-material";
 
 function Login() {
   const authContext = useContext(AuthContext);
-
-  const [user, setUser] = useState({});
   const [credentialsErros, setCredentialsError] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const [user,setUser]=useState({});
   const [inputs, setInputs] = useState({
-    email: "admin@jsonapi.com",
+    user_name: "Admin",
     password: "secret",
   });
 
   const [errors, setErrors] = useState({
-    emailError: false,
+    userError: false,
     passwordError: false,
   });
 
@@ -63,19 +61,14 @@ function Login() {
     // check rememeber me?
     e.preventDefault();
 
-    const mailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
-    if (inputs.email.trim().length === 0 || !inputs.email.trim().match(mailFormat)) {
-      setErrors({ ...errors, emailError: true });
-      return;
-    }
+    
 
     if (inputs.password.trim().length < 6) {
       setErrors({ ...errors, passwordError: true });
       return;
     }
 
-    const newUser = { email: inputs.email, password: inputs.password };
+    const newUser = { user_name: inputs.user, password: inputs.password };
     addUserHandler(newUser);
 
     const myData = {
@@ -90,7 +83,7 @@ function Login() {
     try {
       const response = await AuthService.login(myData);
       authContext.login(response.access_token, response.refresh_token);
-      obtenerUsuarioSist(response.id)
+      DataTrazas.crear({accion: 'Se ha autenticado'});
     } catch (res) {
       console.error("Error en el login:", res);
     
@@ -105,12 +98,12 @@ function Login() {
 
     return () => {
       setInputs({
-        email: "",
+        user: "",
         password: "",
       });
 
       setErrors({
-        emailError: false,
+        userError: false,
         passwordError: false,
       });
     };
@@ -155,11 +148,11 @@ function Login() {
           <MDBox component="form" role="form" method="POST" onSubmit={submitHandler}>
             <MDBox mb={2}>
               <MDInput
-                type="email"
-                label="Email"
+                type="text"
+                label="Usuario"
                 fullWidth
                 value={inputs.email}
-                name="email"
+                name="user"
                 onChange={changeHandler}
                 error={errors.emailError}
               />

@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from '../user/shema/user.shema';
 import { PasswordReset, PasswordResetSchema } from '../user/shema/password-reset.schema';
-import { TrazasModule } from 'src/trazas/trazas.module';
+
 @Module({
   imports: [
     ConfigModule,
@@ -19,10 +19,9 @@ import { TrazasModule } from 'src/trazas/trazas.module';
       { name: User.name, schema: UserSchema },
       { name: PasswordReset.name, schema: PasswordResetSchema },
     ]),
-    TrazasModule
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService], // Se eliminó JwtAuthGuard como proveedor innecesario.
+  exports: [AuthService, JwtModule], // Asegúrate de exportar JwtModule para que otros módulos tengan acceso.
 })
 export class AuthModule {}

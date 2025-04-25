@@ -16,6 +16,7 @@ import DataTable from "examples/Tables/DataTable";
 
 
 function Calculation() {
+  
   const [calculo, setCalculo] = useState({
     densidad_a: 0,
     densidad_m: 0,
@@ -25,9 +26,9 @@ function Calculation() {
     angulo: 0,
     aceleracion: 0,
     P: 0,
-    id: 0,
   });
-
+  
+  
   const [editar, setEditar] = useState(false);
   const [mstNvoCalc, setMstNvoCalc] = useState(false);
   const [calculos, setCalculos] = useState([]);
@@ -46,6 +47,7 @@ function Calculation() {
     getDatos();
   }, []);
 
+ 
   const limpiarDatos = () => {
     setCalculo({
       densidad_a: 0,

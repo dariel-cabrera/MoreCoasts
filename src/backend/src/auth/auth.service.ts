@@ -9,7 +9,7 @@ import * as randomToken from 'random-token';
 
 import { User } from 'src/user/shema/user.shema';
 import { PasswordReset, PasswordResetDocument } from '../user/shema/password-reset.schema';
-import { TrazasService } from 'src/trazas/trazas.service';
+
 
 @Injectable()
 export class AuthService {
@@ -20,7 +20,7 @@ export class AuthService {
     @InjectModel(PasswordReset.name) private readonly passwordResetModel: Model<PasswordResetDocument>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly trazasService:TrazasService
+    
   ) {
     // Configuración del transportador de nodemailer
     this.transporter = nodemailer.createTransport({
@@ -34,9 +34,10 @@ export class AuthService {
   }
 
   // 🔐 Login de usuario
-  async login(email: string, password: string) {
-    const user = await this.userModel.findOne({ email });
-
+  async login(user_name: string, password: string) {
+    
+    const user = await this.userModel.findOne({ user_name });
+    
     if (!user) {
       throw new HttpException('Las credenciales no son válidas', HttpStatus.UNAUTHORIZED);
     }
@@ -46,12 +47,9 @@ export class AuthService {
       console.log(user.password)
       throw new HttpException('Contraseña incorrecta', HttpStatus.UNAUTHORIZED);
     }
-    else{
-        await this.trazasService.createTrazas(user._id,` Se ha autenticado`)
-    }
-
+    
     // Generar token JWT
-    const payload = { id: user._id, email: user.email };
+    const payload = { id: user._id, user: user.user_name };
     const token = this.jwtService.sign(payload);
 
     return {

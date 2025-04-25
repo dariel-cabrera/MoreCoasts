@@ -8,6 +8,9 @@ export class Trazas {
     user_name: string;
 
     @Prop({ required: true })
+    name: string;
+
+    @Prop({ required: true })
     last_name: string;
 
     @Prop({ required: true })

@@ -1,9 +1,11 @@
 import { IsEmail, IsNotEmpty, MinLength, Matches, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+
+
 class AttributesDto {
   @IsString()
   @IsNotEmpty()
-  email: string;
+  user_name: string;
 
   @IsString()
   @IsNotEmpty()
@@ -27,6 +29,8 @@ export class LoginDto {
   @IsNotEmpty()
   data: DataDto;
 }
+
+/* 
 export class RegisterDto {
   @IsNotEmpty()
   name: string;
@@ -62,3 +66,4 @@ export class ResetPasswordDto {
   @IsNotEmpty()
   password_confirmation: string;
 }
+*/

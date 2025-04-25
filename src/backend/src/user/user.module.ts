@@ -5,12 +5,14 @@ import { PasswordReset, PasswordResetSchema } from './shema/password-reset.schem
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema:  UserSchema },
       { name: PasswordReset.name, schema: PasswordResetSchema }, // Registro del schema
     ]),
+    
   ],
   providers: [UserService],
   controllers: [UserController],

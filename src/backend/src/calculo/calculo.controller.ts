@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, Post, Put,Param} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put,Param,UseGuards, Req} from '@nestjs/common';
 import { CalculoService } from "./calculo.service";
 import { CreateCalculoDto } from './dto/createCalculo.dto';
 import { UpdateCalculoDto } from './dto/updateCalculo.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
 
 @Controller()
 export class CalculoController {
       calculoService: CalculoService;
+      
   
       constructor(calculoService: CalculoService){
         this.calculoService= calculoService;
@@ -17,8 +20,11 @@ export class CalculoController {
         return this.calculoService.getCalculo();
       }
 
+      
+
+      @UseGuards(JwtAuthGuard) // Asegura que el token sea válido
       @Post('postCalculation')
-      async createCalculos(@Body() calculo: CreateCalculoDto){
+      async createCalculos(@Body() calculo: CreateCalculoDto,@Req() request: Request){
         const {
           densidad_a,
           densidad_m,
@@ -30,8 +36,9 @@ export class CalculoController {
           Q,
           P,
           K,
-          idUser
+          
         } = calculo;
+        const idUser = request['userId'];
         return this.calculoService.createCalculo(
           densidad_a,
           densidad_m,
@@ -46,8 +53,15 @@ export class CalculoController {
           idUser
         );
       }
+      @UseGuards(JwtAuthGuard) // Asegura que el token sea válido
       @Put('updateCalculation/:id')
-      async updateCalculos(@Param('id') id:string, @Body() calculo:UpdateCalculoDto){
+      async updateCalculos(
+
+        @Param('id') id:string, 
+        @Body() calculo:UpdateCalculoDto,
+        @Req() request: Request){
+
+        const idUser = request['userId'];
         const {
           densidad_a,
           densidad_m,
@@ -59,8 +73,9 @@ export class CalculoController {
           Q,
           P,
           K,
-          idUser
+          
         } = calculo;
+       
         return this.calculoService.updateCalculo(
           id,
           densidad_a,
@@ -78,9 +93,10 @@ export class CalculoController {
       }
 
      
-
+      @UseGuards(JwtAuthGuard) // Asegura que el token sea válido
       @Delete('deleteCalculation/:id')
-      async deleteCalculos(@Param('id') id: string,@Body() idUser:string){
+      async deleteCalculos(@Param('id') id: string,@Req() request: Request){
+        const idUser = request['userId'];
         return this.calculoService.deleteCalculo(id,idUser);
       }
 	}

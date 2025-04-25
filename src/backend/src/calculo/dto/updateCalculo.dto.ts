@@ -42,7 +42,5 @@ export class UpdateCalculoDto{
     @IsNotEmpty()
     K:number
 
-    @IsString()
-    @IsNotEmpty()
-    idUser:string
+    
 }

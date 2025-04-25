@@ -1,37 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { User, UserSchema } from 'src/user/shema/user.shema';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import * as mongoose from 'mongoose';
-import { config } from 'dotenv';
-
-config(); // Cargar variables de entorno
+import { User } from 'src/user/shema/user.shema';
 
 @Injectable()
-export class SeedService {
+export class SeedService implements OnApplicationBootstrap {
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+  ) {}
+
+  async onApplicationBootstrap() {
+    console.log('🚀 Ejecutando operación de seed...');
+    await this.seedAdminUser();
+  }
+
   async seedAdminUser() {
     try {
-      const connection = await mongoose.connect(process.env.MONGO_URI as string, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      } as mongoose.ConnectOptions);
-
-      console.log('✅ Conectado a la base de datos.');
-
-      const UserModel = connection.model<User>('User', UserSchema);
-
-      const existingUser = await UserModel.findOne({ email: 'admin@jsonapi.com' });
+      const existingUser = await this.userModel.findOne({ email: 'admin@jsonapi.com' });
       if (existingUser) {
         console.log('⚠️ El usuario administrador ya existe.');
-        await mongoose.connection.close();
         return;
       }
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash('secret', salt);
 
-      const user = new UserModel({
-        _id: new mongoose.Types.ObjectId(),
+      const user = new this.userModel({
+        user_name: 'Admin',
         name: 'Admin',
+        lastname: 'Admin',
+        ci: '0000000000',
         email: 'admin@jsonapi.com',
         password: hashedPassword,
         created_at: new Date(),
@@ -40,10 +39,8 @@ export class SeedService {
       await user.save();
       console.log('✅ Usuario administrador creado con éxito.');
     } catch (error) {
-      console.error('❌ Error insertando el usuario administrador:', error);
-    } finally {
-      await mongoose.connection.close();
-      console.log('🔌 Conexión cerrada.');
+      console.error('❌ Error creando el usuario administrador:', error);
     }
   }
 }
+

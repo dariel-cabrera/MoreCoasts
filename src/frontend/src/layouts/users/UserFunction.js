@@ -1,5 +1,6 @@
 import Swal from 'sweetalert2';
 import { eliminar, actualizar, crear } from './UserHttp';
+import DataTrazas from 'layouts/trazas/DataTrazas';
 
 
 // Función para eliminar datos
@@ -28,10 +29,11 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
       await eliminar(idValue); 
       await getDatos();
       limpiarDatos();
+      DataTrazas.crear({accion: 'Ha eliminado un usuario'});
       swalWithBootstrapButtons.fire({
         title: "Eliminados!",
         text: "Sus datos han sido eliminados",
-        icon: "success"
+        icon: "success",
       });
     } catch (error) {
       swalWithBootstrapButtons.fire({
@@ -77,15 +79,17 @@ export const actualizarDatos = async ({ user, getDatos, limpiarDatos }) => {
       await actualizar(id,user_name,name,lastname,email);
       await getDatos();
       limpiarDatos();
+      DataTrazas.crear({accion: 'Ha actualizado un usuario'});
       swalWithBootstrapButtons.fire({
         title: "Actualizados!",
         text: "Sus datos han sido actualizados.",
         icon: "success"
       });
     } catch (error) {
+      const {message}=error
       swalWithBootstrapButtons.fire({
         title: "Error",
-        text: "Hubo un problema al actualizar los datos",
+        text: `Hubo un problema al actualizar los datos. ${message}`,
         icon: "error"
       });
     }
@@ -115,6 +119,7 @@ export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
   try {
     await crear(user_name,name,lastname,email,password,ci);
     await getDatos();
+    DataTrazas.crear({accion: 'Ha creado un usuario'});
     Swal.fire({
       position: "top-end",
       icon: "success",
@@ -124,10 +129,12 @@ export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
     });
     limpiarDatos();
   } catch (error) {
+    const {message}=error
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Hubo un problema al crear el usuario.'
+      text: `Hubo un problema al crear el usuario.  ${message}`
     });
   }
 };
+  

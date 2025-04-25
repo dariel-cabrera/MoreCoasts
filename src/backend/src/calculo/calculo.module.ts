@@ -4,13 +4,12 @@ import { CalculoService } from "./calculo.service";
 import { MongooseModule } from '@nestjs/mongoose';
 import { Calculation,CalculationSchema } from "./shema/datos.schema";
 import { TrazasModule } from 'src/trazas/trazas.module';
-
-
-
+import { AuthModule } from "src/auth/auth.module";
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Calculation.name, schema:  CalculationSchema }]),
-    TrazasModule
+    TrazasModule,
+    AuthModule
   ],
    controllers:[CalculoController],
    providers:[CalculoService],
