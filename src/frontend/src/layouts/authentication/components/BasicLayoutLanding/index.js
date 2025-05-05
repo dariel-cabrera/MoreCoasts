@@ -22,12 +22,7 @@ function BasicLayout({ image, children }) {
   return (
     <PageLayout>
       <DefaultNavbar
-        action={{
-          type: "external",
-          route: "https://creative-tim.com/product/material-dashboard-react-nodejs",
-          label: "free download",
-          color: "dark",
-        }}
+        
       />
       <MDBox
         sx={{ height: "auto", minHeight: "100vh" }}
@@ -72,11 +67,10 @@ function BasicLayout({ image, children }) {
                     width="80%"
                   >
                     <Typography variant="h3" style={{ color: "white" }}>
-                      Log in to Material Dashboard NodeJS Live Preview
+                      Bienvenidos a MoreCoast
                     </Typography>
                     <Typography variant="body2" style={{ color: "white" }} margin="0.5rem 0">
-                      Log in to see how you can go from frontend to fullstack in an instant with an
-                      API-based NodeJS backend
+                      MoreCoast cuida tu Playa
                     </Typography>
                     <MDBox
                       display="flex"
@@ -85,32 +79,7 @@ function BasicLayout({ image, children }) {
                       alignItems="center"
                       marginBottom="0.5rem"
                     >
-                      <Typography variant="body2" fontWeight="700" style={{ color: "white" }}>
-                        You can log in with
-                      </Typography>
-                      <List dense={true}>
-                        <ListItem>
-                          <ListItemText
-                            disableTypography
-                            primary={
-                              <Typography
-                                variant="body2"
-                                fontWeight="400"
-                                style={{ color: "white" }}
-                              >
-                                Username{" "}
-                                <Typography variant="span" fontWeight="700">
-                                  admin@jsonapi.com
-                                </Typography>{" "}
-                                with password{" "}
-                                <Typography variant="span" fontWeight="700">
-                                  secret
-                                </Typography>
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      </List>
+                      
                     </MDBox>
                   </MDBox>
                 </MDBox>

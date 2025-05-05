@@ -25,6 +25,27 @@ import ResetPassword from "auth/reset-password";
 import Icon from "@mui/material/Icon";
 import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import TrazasImg from "assets/images/trazas.png";
+import UserImg from "assets/images/user.png";
+import CalculationImg from "assets/images/calculation.png";
+import InicioImg from "assets/images/inicio.png";
+import UbicacionImg from "assets/images/ubicacion.png"
+
+const ImageIcon = ({ src, alt, fontSize = "small" }) => {
+  const size = fontSize === "small" ? 20 : 25; // Ajusta los tamaños según necesites
+  
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      style={{ 
+        width: size, 
+        height: size,
+        filter: "invert(1)", // Opcional: si necesitas que sean blancos
+      }} 
+    />
+  );
+};
 
 const routes = [
   {
@@ -39,15 +60,15 @@ const routes = [
     type: "collapse",
     name: "Inicio",
     key: "dashboard",
-    icon: <HomeOutlinedIcon fontSize={"small"} />,
+    icon: <ImageIcon src={InicioImg} alt="Inicio" fontSize="small" />,
     route: "/dashboard",
     component: <Dashboard />,
   },
   {
     type: "collapse",
-    name: "Areas",
-    key: "areas",
-    icon: <HomeOutlinedIcon fontSize={"small"} />,
+    name: "Ubicación",
+    key: "ubicacion",
+    icon: <ImageIcon src={UbicacionImg} alt="Ubicación" fontSize="small" />,
     route: "/area",
     component: <Mapa />,
   },  
@@ -55,7 +76,7 @@ const routes = [
     type: "collapse",
     name: "Cálculos",
     key: "calculation",
-    icon: <CalculateOutlinedIcon fontSize={"small"} />,
+    icon: <ImageIcon src={CalculationImg} alt="Calculos" fontSize="small" />,
     route: "/calculation",
     component: <Calculation />,
   }, 
@@ -63,7 +84,7 @@ const routes = [
     type:"collapse",
     name:"Usuarios",
     key:"users",
-    icon:<Icon fontSize="small">user</Icon>,
+    icon:<ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
     route:"/users",
     component:<Users />,
    },
@@ -71,7 +92,7 @@ const routes = [
     type:"collapse",
     name:"Trazas",
     key:"trazas",
-    icon:<Icon fontSize="small">user</Icon>,
+    icon:<ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
     route:"/trazas",
     component:<Trazas />,
    },
