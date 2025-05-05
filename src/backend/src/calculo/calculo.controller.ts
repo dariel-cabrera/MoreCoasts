@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Post, Put,Param,UseGuards, Req} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put,Param,UseGuards, Req, Res} from '@nestjs/common';
 import { CalculoService } from "./calculo.service";
 import { CreateCalculoDto } from './dto/createCalculo.dto';
 import { UpdateCalculoDto } from './dto/updateCalculo.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+
 
 @Controller()
 export class CalculoController {
@@ -12,6 +13,7 @@ export class CalculoController {
   
       constructor(calculoService: CalculoService){
         this.calculoService= calculoService;
+      
         
       }
 
@@ -99,4 +101,23 @@ export class CalculoController {
         const idUser = request['userId'];
         return this.calculoService.deleteCalculo(id,idUser);
       }
+
+      @Get('export-excel')
+      async exportToexcel(@Res() res: Response) {
+      try {
+        const { buffer, nombreHoja } = await this.calculoService.exportToexcel();
+
+          res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
+        res.setHeader('Content-Disposition', `attachment; filename=${nombreHoja}.xlsx`);
+        res.send(buffer);
+      } catch (error) {
+        console.error('Error al exportar:', error);
+        res.status(500).json({ error: 'Error al generar el reporte' });
+      }
+      }
+
+
 	}

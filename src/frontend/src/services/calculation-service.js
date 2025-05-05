@@ -20,6 +20,11 @@ class  CalculationService {
         const url="postCalculation"
         return await HttpService.post(url,datos)
     }
+
+    exportToExcel= async()=>{
+        const url="exportToExcel"
+        return await HttpService.get(url)
+    }
 }
 
 export default new CalculationService();

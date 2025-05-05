@@ -13,7 +13,7 @@ import { EditControl } from 'react-leaflet-draw';
 import { format, parse } from 'date-fns'; // Importar format y parse de date-fns
 
 import UbicacionService from 'services/ubicacion-service';
-
+import { crear,eliminar } from './mapHttp';
 
 const Mapa = () => {
     const [areas, setAreas] = useState([]);
@@ -33,12 +33,29 @@ const Mapa = () => {
 
     // Obtener los circuitos desde el backend
     const fetchArea = async () => {
-        const response = await UbicacionService.getUbicaciones()
-        setAreas(response.data.map(area => ({
-            ...area,
-            visible: true,
-        })));
-    };
+        try {
+          const response = await UbicacionService.getUbicaciones();
+          console.log("Datos recibidos:", response.data); // Verificar estructura de datos
+          
+          const formattedAreas = response.data.map(area => {
+            // Asegurarse que poligono es un array de arrays de [lat, lng]
+            const polygonCoords = Array.isArray(area.poligono) ? 
+              area.poligono.map(coord => 
+                Array.isArray(coord) ? coord : [coord.lat, coord.lng]
+              ) : [];
+            
+            return {
+              ...area,
+              poligono: polygonCoords,
+              visible: true
+            };
+          });
+          
+          setAreas(formattedAreas);
+        } catch (error) {
+          console.error("Error fetching areas:", error);
+        }
+      };
 
     // Guardar un circuito (crear o actualizar)
     const handleSave = async () => {
@@ -48,18 +65,19 @@ const Mapa = () => {
 
         try {
             if (currentArea._id) {
-                await axios.put(`http://localhost:5000/api/circuits/${currentCircuit._id}`, circuitoParaGuardar);
-                setSnackbarMessage('Circuito actualizado correctamente');
+                await axios.put(`http://localhost:5000/api/circuits/${currentArea._id}`, areaParaGuardar);
+                setSnackbarMessage('Area actualizada correctamente');
             } else {
-                await axios.post('http://localhost:5000/api/circuits', areaParaGuardar);
-                setSnackbarMessage('Circuito creado correctamente');
+                console.log(currentArea.poligono);
+                await crear(areaParaGuardar);
+                setSnackbarMessage('Area creada correctamente');
             }
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
             setOpen(false);
-            fetchCircuits(); // Actualizar la lista de circuitos
+            fetchArea(); // Actualizar la lista de circuitos
         } catch (error) {
-            setSnackbarMessage('Error al guardar el circuito');
+            setSnackbarMessage('Error al guardar el area');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
@@ -68,9 +86,9 @@ const Mapa = () => {
     // Eliminar un circuito
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/circuits/${id}`);
-            setCircuits((prevCircuits) => prevCircuits.filter(circuit => circuit._id !== id)); // Actualizar el estado local
-            setSnackbarMessage('Circuito eliminado correctamente');
+            await eliminar(id)
+            setAreas((prevArea) => prevArea.filter(area => area._id !== id)); // Actualizar el estado local
+            setSnackbarMessage('Area eliminada correctamente');
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
 
@@ -80,7 +98,7 @@ const Mapa = () => {
                 featureGroupRef.current.removeLayer(layer);
             }
         } catch (error) {
-            setSnackbarMessage('Error al eliminar el circuito');
+            setSnackbarMessage('Error al eliminar el area');
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
@@ -90,50 +108,44 @@ const Mapa = () => {
     const handleCreate = useCallback((e) => {
         const { layerType, layer } = e;
         if (layerType === 'polygon') {
-            const coordinates = layer.getLatLngs()[0].map(latLng => [latLng.lat, latLng.lng]);
-            setCurrentCircuit({ ...currentCircuit, poligono: coordinates });
+            const coordinates = layer.getLatLngs()[0].map(latLng => [latLng.lat, latLng.lng ]);
+            setCurrentArea({ ...currentArea, poligono: coordinates });
             setOpen(true);
         }
-    }, [currentCircuit]);
+    }, [currentArea]);
 
     // Alternar la visibilidad de un circuito
     const toggleVisibility = useCallback((id) => {
-        setCircuits((prevCircuits) =>
-            prevCircuits.map(circuit =>
-                circuit._id === id ? { ...circuit, visible: !circuit.visible } : circuit
+        setAreas((prevAreas) =>
+            prevAreas.map(area =>
+                area._id === id ? { ...area, visible: !area.visible } : area
             )
         );
     }, []);
 
-    // Verificar si un circuito tiene energía en la hora actual
-    const hasEnergy = useCallback((horarioInicio, horarioFin) => {
-        const now = format(currentTime, 'HH:mm:ss'); // Obtener la hora actual en formato HH:mm:ss
-        return now >= format(horarioInicio, 'HH:mm:ss') && now <= format(horarioFin, 'HH:mm:ss');
-    }, [currentTime]);
-
-    // Memoizar los polígonos para evitar re-renderizados innecesarios
-    const visibleCircuits = useMemo(() => {
-        return circuits.filter(circuit => circuit.visible).map((circuit, idx) => {
-            const hasEnergyNow = hasEnergy(circuit.horarioInicio, circuit.horarioFin);
+      // Memoizar los polígonos para evitar re-renderizados innecesarios
+      const visibleAreas = useMemo(() => {
+        return areas.filter(area => area.visible).map((area, idx) => {
+            
             return (
                 <Polygon
-                    key={circuit._id}
-                    positions={circuit.poligono}
-                    pathOptions={{ color: hasEnergyNow ? 'green' : 'red' }} // Colorear según el horario
+                    key={area._id}
+                    positions={area.poligono}
+                    pathOptions={{ color:  'green' } }// Colorear según el horario
                 >
                     <Popup>
                         <div>
-                            <h3>{circuit.nombre}</h3>
-                            <p>{circuit.ciudad}</p>
-                            <p>{format(circuit.horarioInicio, 'hh:mm a')} - {format(circuit.horarioFin, 'hh:mm a')}</p>
-                            <Button onClick={() => { setCurrentCircuit(circuit); setOpen(true); }}>Editar</Button>
-                            <Button onClick={() => handleDelete(circuit._id)}>Eliminar</Button>
+                            <h3>{area.nombre}</h3>
+                            <p>{area.ciudad}</p>
+                            <Button onClick={() => { setCurrentArea(area); setOpen(true); }}>Editar</Button>
+                            <Button onClick={() => handleDelete(area._id)}>Eliminar</Button>
                         </div>
                     </Popup>
                 </Polygon>
             );
         });
-    }, [circuits, hasEnergy]);
+    }, [areas]);
+
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -141,9 +153,9 @@ const Mapa = () => {
                 <AppBar position="static">
                     <Toolbar>
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            Areas de Calculadas
+                            Areas Calculadas
                         </Typography>
-                        <Reloj /> {/* Usar el componente Reloj */}
+                       
                     </Toolbar>
                 </AppBar>
                 <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
@@ -152,15 +164,15 @@ const Mapa = () => {
                             Lista de Areas
                         </Typography>
                         <List>
-                            {circuits.map((circuit) => (
-                                <ListItem key={circuit._id}>
+                            {areas.map((area) => (
+                                <ListItem key={area._id}>
                                     <Checkbox
-                                        checked={circuit.visible}
-                                        onChange={() => toggleVisibility(circuit._id)}
+                                        checked={area.visible}
+                                        onChange={() => toggleVisibility(area._id)}
                                     />
-                                    <ListItemText primary={circuit.nombre} secondary={`${circuit.ciudad} - ${format(circuit.horarioInicio, 'hh:mm a')} a ${format(circuit.horarioFin, 'hh:mm a')}`} />
-                                    <Button onClick={() => { setCurrentCircuit(circuit); setOpen(true); }}>Editar</Button>
-                                    <Button onClick={() => handleDelete(circuit._id)}>Eliminar</Button>
+                                    <ListItemText primary={area.nombre} secondary={`${area.ciudad} `} />
+                                    <Button onClick={() => { setCurrentArea(area); setOpen(true); }}>Editar</Button>
+                                    <Button onClick={() => handleDelete(area._id)}>Eliminar</Button>
                                 </ListItem>
                             ))}
                         </List>
@@ -182,16 +194,15 @@ const Mapa = () => {
                                     }}
                                 />
                             </FeatureGroup>
-                          
+                            {visibleAreas}
                         </MapContainer>
                     </div>
                 </div>
                 <Dialog open={open} onClose={() => setOpen(false)}>
-                    <DialogTitle>{currentCircuit._id ? 'Editar Area' : 'Nuevo Area'}</DialogTitle>
+                    <DialogTitle>{currentArea._id ? 'Editar Area' : 'Nuevo Area'}</DialogTitle>
                     <DialogContent>
-                        <TextField label="Nombre" value={currentCircuit.nombre} onChange={(e) => setCurrentCircuit({ ...currentCircuit, nombre: e.target.value })} fullWidth margin="dense" />
-                        <TextField label="Ciudad" value={currentCircuit.ciudad} onChange={(e) => setCurrentCircuit({ ...currentCircuit, ciudad: e.target.value })} fullWidth margin="dense" />
-                        
+                        <TextField label="Nombre" value={currentArea.nombre} onChange={(e) => setCurrentArea({ ...currentArea, nombre: e.target.value })} fullWidth margin="dense" />
+                        <TextField label="Ciudad" value={currentArea.ciudad} onChange={(e) => setCurrentArea({ ...currentArea, ciudad: e.target.value })} fullWidth margin="dense" />
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setOpen(false)}>Cancelar</Button>

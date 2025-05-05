@@ -18,8 +18,8 @@ export class UbicacionController {
    
    @Post('postUbicacion')
         async postTrazas(@Body()ubicacion:UbicacionDto){
-        const {nombre,ciudad,poligono}=ubicacion
-        return this.ubicacionService.createUbicacion(nombre,ciudad,poligono)
+        
+        return this.ubicacionService.createUbicacion(ubicacion)
     } 
 
     @Delete('deleteUbicacion/:id')

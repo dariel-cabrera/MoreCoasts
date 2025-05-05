@@ -17,6 +17,7 @@ import UserManagement from "layouts/user-management";
 
 import Login from "auth/login";
 import Register from "auth/register";
+import Mapa from "layouts/map/map";
 import ForgotPassword from "auth/forgot-password";
 import ResetPassword from "auth/reset-password";
 
@@ -42,9 +43,17 @@ const routes = [
     route: "/dashboard",
     component: <Dashboard />,
   },
+  {
+    type: "collapse",
+    name: "Areas",
+    key: "areas",
+    icon: <HomeOutlinedIcon fontSize={"small"} />,
+    route: "/area",
+    component: <Mapa />,
+  },  
    {
     type: "collapse",
-    name: "Calculation",
+    name: "Cálculos",
     key: "calculation",
     icon: <CalculateOutlinedIcon fontSize={"small"} />,
     route: "/calculation",
@@ -52,7 +61,7 @@ const routes = [
   }, 
    {
     type:"collapse",
-    name:"Users",
+    name:"Usuarios",
     key:"users",
     icon:<Icon fontSize="small">user</Icon>,
     route:"/users",
@@ -66,30 +75,7 @@ const routes = [
     route:"/trazas",
     component:<Trazas />,
    },
-  {
-    type: "collapse",
-    name: "Tables",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
-    component: <Tables />,
-  },
-  {
-    type: "collapse",
-    name: "Billing",
-    key: "billing",
-    icon: <Icon fontSize="small">receipt_long</Icon>,
-    route: "/billing",
-    component: <Billing />,
-  },
-  {
-    type: "collapse",
-    name: "RTL",
-    key: "rtl",
-    icon: <Icon fontSize="small">format_textdirection_r_to_l</Icon>,
-    route: "/rtl",
-    component: <RTL />,
-  },
+ 
   {
     type: "collapse",
     name: "Notifications",

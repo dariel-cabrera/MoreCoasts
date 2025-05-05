@@ -13,7 +13,7 @@ import { NuevoCalculo } from "./NuevoCalculo";
 import { eliminarDatos } from "./CalculationFunction";
 import { Card } from "@mui/material";
 import DataTable from "examples/Tables/DataTable";
-
+import { ExportToExcel } from "layouts/buttonExport/ExportToExcel";
 
 function Calculation() {
   
@@ -111,9 +111,25 @@ function Calculation() {
         />
       ) : (
         <>
-          <MDButton variant="gradient" color="info" size="medium" onClick={handleNuevoCalculo}>
-                        Nuevo
-          </MDButton>
+          <MDBox 
+              display="flex" 
+              justifyContent="space-between"  // Separa los elementos a los extremos
+              alignItems="center" 
+              mb={2}  // Margen inferior
+          >
+            <MDButton 
+              variant="gradient" 
+              color="info" 
+              size="medium" 
+              onClick={handleNuevoCalculo}
+            >
+              Nuevo
+            </MDButton>
+            
+            <MDBox sx={{ ml: "auto" }}>  {/* Empuja el botón a la derecha */}
+              <ExportToExcel />
+            </MDBox>
+          </MDBox>
         <MDBox pt={6} pb={3}>
           <Grid container spacing={6}>
             <Grid item xs={12}>

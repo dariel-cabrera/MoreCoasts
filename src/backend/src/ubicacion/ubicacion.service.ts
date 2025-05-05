@@ -23,16 +23,19 @@ export class UbicacionService{
     }
 
   async createUbicacion (
-    nombre:string,
-    ciudad:string,
-    poligono:number[][]
+    ubicacion
   ): Promise<Ubicacion>{
     
-    const nuevoDato= new this.datosModel({
-       nombre:nombre,
-       ciudad:ciudad,
-       poligono:poligono
-    });
+    
+    
+  // Si usas la solución con @Transform, puedes usar directamente:
+  // const poligonoFormateado = ubicacionDto.poligono;
+  
+  const nuevoDato = new this.datosModel({
+      nombre: ubicacion.nombre,
+      ciudad: ubicacion.ciudad,
+      poligono: ubicacion.poligono
+  });
     return await nuevoDato.save();
   }
 

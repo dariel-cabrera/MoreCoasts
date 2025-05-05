@@ -1,5 +1,6 @@
 import UbicacionService from "services/ubicacion-service";
 
+
 export const eliminar= async(id)=> {
      try {
             const response = await UbicacionService.deleteUbicacion(id);

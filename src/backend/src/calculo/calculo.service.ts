@@ -1,22 +1,21 @@
-import { Injectable,HttpException,HttpStatus } from "@nestjs/common";
-import { Calculation} from "./shema/datos.schema";
+import { Injectable, HttpException, HttpStatus, Inject } from "@nestjs/common";
+import { Calculation } from "./shema/datos.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import * as ExcelJS from 'exceljs';
 import { TrazasService } from 'src/trazas/trazas.service';
-
+import { Response } from 'express';
+import { IReporteGenerador} from "src/report/interface/report.interface";
 
 @Injectable()
-export class CalculoService{
+export class CalculoService {
   constructor(
     @InjectModel(Calculation.name) private readonly datosModel: Model<Calculation>,
-    
-    private readonly trazasService:TrazasService,
+    private readonly trazasService: TrazasService,
+    @Inject('IReporteGenerador')
+    private readonly reporteGenerador: IReporteGenerador<any>,
   ) {}
 
- 
-
-  // Crear un nuevo registro
   async createCalculo(
     densidad_a: number,
     densidad_m: number,
@@ -28,26 +27,29 @@ export class CalculoService{
     Q: number,
     P: number,
     K: number,
-    idUser:string
+    idUser: string
   ): Promise<Calculation> {
-    const nuevoDato = new this.datosModel({
-      densidad_a,
-      densidad_m,
-      indice,
-      coeficiente,
-      altura,
-      angulo,
-      aceleracion,
-      Q,
-      P,
-      K,
-     
-    });
-    this.trazasService.createTrazas('Ha realizado un cálculo',idUser)
-    return await nuevoDato.save();
+    try {
+      const nuevoDato = new this.datosModel({
+        densidad_a,
+        densidad_m,
+        indice,
+        coeficiente,
+        altura,
+        angulo,
+        aceleracion,
+        Q,
+        P,
+        K,
+      });
+      
+      await this.trazasService.createTrazas('Ha realizado un cálculo', idUser);
+      return await nuevoDato.save();
+    } catch (error) {
+      throw new HttpException('Error al crear el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  // Actualizar un registro existente
   async updateCalculo(
     id: string,
     densidad_a: number,
@@ -60,82 +62,90 @@ export class CalculoService{
     Q: number,
     P: number,
     K: number,
-    idUser:string,
+    idUser: string,
   ): Promise<Calculation> {
-    this.trazasService.createTrazas('Ha actualizado un Cálculo',idUser)
-    return await this.datosModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          densidad_a,
-          densidad_m,
-          indice,
-          coeficiente,
-          altura,
-          angulo,
-          aceleracion,
-          Q,
-          P,
-          K,
+    try {
+      await this.trazasService.createTrazas('Ha actualizado un Cálculo', idUser);
+      return await this.datosModel.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            densidad_a,
+            densidad_m,
+            indice,
+            coeficiente,
+            altura,
+            angulo,
+            aceleracion,
+            Q,
+            P,
+            K,
+          },
+        },
+        { new: true },
+      );
+    } catch (error) {
+      throw new HttpException('Error al actualizar el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async deleteCalculo(_id: string, idUser: string): Promise<any> {
+    try {
+      const dato = await this.datosModel.findOne({ _id });
+      if (!dato) {
+        throw new HttpException('Cálculo no encontrado', HttpStatus.NOT_FOUND);
+      }
+      
+      await this.trazasService.createTrazas('Ha eliminado un cálculo', idUser);
+      return await this.datosModel.deleteOne({ _id });
+    } catch (error) {
+      throw new HttpException('Error al eliminar el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getCalculo(): Promise<Calculation[]> {
+    try {
+      return await this.datosModel.find().exec();
+    } catch (error) {
+      throw new HttpException('Error al obtener los cálculos', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
+  async exportToexcel(){
+    const calculations = await this.datosModel.find().exec();
+
+    const config = {
+      nombreHoja: 'Cálculos de Sedimentos',
+      columnas: [
+        { header: 'ID', key: '_id', width: 25 },
+        { header: 'Densidad Aire (kg/m³)', key: 'densidad_a', width: 20 },
+        { header: 'Densidad Material (kg/m³)', key: 'densidad_m', width: 20 },
+        { header: 'Índice', key: 'indice', width: 15 },
+        { header: 'Coeficiente', key: 'coeficiente', width: 15 },
+        { header: 'Altura (m)', key: 'altura', width: 15 },
+        { header: 'Ángulo (°)', key: 'angulo', width: 15 },
+        { header: 'Aceleración (m/s²)', key: 'aceleracion', width: 20 },
+        { header: 'Q', key: 'Q', width: 15 },
+        { header: 'P', key: 'P', width: 15 },
+        { header: 'K', key: 'K', width: 15 },
+      ],
+      estiloEncabezado: {
+        bold: true,
+        fillColor: 'FFD3D3D3',
+        alignment: { 
+          vertical: 'middle' as const,  // Usamos 'as const' para asegurar el tipo literal
+          horizontal: 'center' as const // Usamos 'as const' para asegurar el tipo literal
         },
       },
-      
-      { new: true }, // Retornar el documento actualizado
-    );
-    
+    };
+    // Transformar datos si es necesario (ej: _id a string)
+    const data = calculations.map(calc => ({
+      ...calc.toObject(),
+      _id: calc._id.toString(),
+    }));
+
+    const buffer= await this.reporteGenerador.generar(data,config);
+    return { buffer, nombreHoja: config.nombreHoja}
   }
-
-  // Eliminar un registro
-  async deleteCalculo(_id: string, idUser:string): Promise<any> {
-    const dato = await this.datosModel.findOne({ _id});
-    if(!dato){
-       throw new HttpException('Calculo no encontrado', HttpStatus.UNAUTHORIZED);
-    }
-    else{
-      this.trazasService.createTrazas('Ha eliminado un cálculo',idUser)
-      return await this.datosModel.deleteOne({ _id});
-    }
-    
-  }
-
-  // Obtener todos los registros
-  async getCalculo(): Promise<Calculation[]> {
-    return await this.datosModel.find().exec();
-
-  }
-
- 
-  /* async exportToExcel(): Promise<Buffer> {
-    try {
-      const calculations = await this.datosModel.find().exec();
-      console.log('Calculations:', calculations);
-
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Calculations');
-
-      worksheet.columns = [
-        { header: 'Densidad A', key: 'densidad_a', width: 30 },
-        { header: 'Densidad M', key: 'densidad_m', width: 30 },
-        { header: 'Índice', key: 'indice', width: 30 },
-        { header: 'Coeficiente', key: 'coeficiente', width: 30 },
-        { header: 'Altura', key: 'altura', width: 30 },
-        { header: 'Ángulo', key: 'angulo', width: 30 },
-        { header: 'Q', key: 'Q', width: 30 },
-        { header: 'P', key: 'P', width: 30 },
-        { header: 'K', key: 'K', width: 30 },
-      ];
-
-      calculations.forEach((calculation) => {
-        worksheet.addRow(calculation);
-      });
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      console.log('Buffer created');
-      return buffer;
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      throw error;
-    }
-  } */
-
 }

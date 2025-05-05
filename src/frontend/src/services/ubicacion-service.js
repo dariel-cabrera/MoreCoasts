@@ -3,8 +3,8 @@ import HttpService from "./htttp.service";
 class UbicacionService {
   // authEndpoint = process.env.API_URL;
 
-    getUbiciones=async()=>{
-         const url="getUbiciones";
+    getUbicaciones=async()=>{
+         const url="getUbicaciones";
          return await HttpService.get(url);
      };
  
