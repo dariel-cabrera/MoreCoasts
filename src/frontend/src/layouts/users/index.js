@@ -19,6 +19,7 @@ function Users(){
         name:"",
         lastname:"",
         user_name:"",
+        rol:"",
         email:"",
         password:"",
         ci:"",

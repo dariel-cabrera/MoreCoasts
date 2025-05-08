@@ -11,6 +11,10 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  readonly rol: string;
+
+  @IsString()
+  @IsNotEmpty()
   readonly lastname: string;
 
   @IsEmail()
@@ -37,6 +41,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   readonly user_name?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly rol?: string;
 
   @IsOptional()
   @IsString()

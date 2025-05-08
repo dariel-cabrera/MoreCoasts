@@ -15,10 +15,11 @@ export const actualizar = async(
     id,
     user_name,
     name,
+    rol,
     lastname,
     email,
 )=>{
-    const data = {user_name,name,lastname,email}
+    const data = {user_name,name,rol,lastname,email,}
     try {
            const response = await UsersService.updateUsers(id, data);
            console.log('Datos actualizados exitosamente:', response.data);
@@ -32,6 +33,7 @@ export const actualizar = async(
 export const crear = async (
    user_name,
    name,
+   rol,
    lastname,
    email,
    password,
@@ -39,7 +41,7 @@ export const crear = async (
    
 ) => {
    
-    const data = {user_name,name,lastname,email,password,ci};
+    const data = {user_name,name,rol,lastname,email,password,ci};
 
     try {
         const response = await UsersService.postUsers(data);

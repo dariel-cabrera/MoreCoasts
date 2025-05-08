@@ -1,4 +1,6 @@
 
+import ProtectedRoute from "examples/ProtectedRoute";
+
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
 import Calculation from "layouts/calculation";
@@ -32,8 +34,7 @@ import InicioImg from "assets/images/inicio.png";
 import UbicacionImg from "assets/images/ubicacion.png"
 
 const ImageIcon = ({ src, alt, fontSize = "small" }) => {
-  const size = fontSize === "small" ? 20 : 25; // Ajusta los tamaños según necesites
-  
+  const size = fontSize === "small" ? 20 : 25;
   return (
     <img 
       src={src} 
@@ -41,7 +42,7 @@ const ImageIcon = ({ src, alt, fontSize = "small" }) => {
       style={{ 
         width: size, 
         height: size,
-        filter: "invert(1)", // Opcional: si necesitas que sean blancos
+        filter: "invert(1)",
       }} 
     />
   );
@@ -62,7 +63,11 @@ const routes = [
     key: "dashboard",
     icon: <ImageIcon src={InicioImg} alt="Inicio" fontSize="small" />,
     route: "/dashboard",
-    component: <Dashboard />,
+    component: (
+      <ProtectedRoute requiredRoles={["admin","worker"]}>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     type: "collapse",
@@ -70,40 +75,59 @@ const routes = [
     key: "ubicacion",
     icon: <ImageIcon src={UbicacionImg} alt="Ubicación" fontSize="small" />,
     route: "/area",
-    component: <Mapa />,
-  },  
-   {
+    component: (
+      <ProtectedRoute requiredRoles={["admin", "worker"]}>
+        <Mapa />
+      </ProtectedRoute>
+    ),
+  },
+  {
     type: "collapse",
     name: "Cálculos",
     key: "calculation",
-    icon: <ImageIcon src={CalculationImg} alt="Calculos" fontSize="small" />,
+    icon: <ImageIcon src={CalculationImg} alt="Cálculos" fontSize="small" />,
     route: "/calculation",
-    component: <Calculation />,
-  }, 
-   {
-    type:"collapse",
-    name:"Usuarios",
-    key:"users",
-    icon:<ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
-    route:"/users",
-    component:<Users />,
-   },
-   {
-    type:"collapse",
-    name:"Trazas",
-    key:"trazas",
-    icon:<ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
-    route:"/trazas",
-    component:<Trazas />,
-   },
- 
+    component: (
+      <ProtectedRoute requiredRoles={["admin", "worker"]}>
+        <Calculation />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    type: "collapse",
+    name: "Usuarios",
+    key: "users",
+    icon: <ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
+    route: "/users",
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <Users />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    type: "collapse",
+    name: "Trazas",
+    key: "trazas",
+    icon: <ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
+    route: "/trazas",
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <Trazas />
+      </ProtectedRoute>
+    ),
+  },
   {
     type: "collapse",
     name: "Notifications",
     key: "notifications",
     icon: <Icon fontSize="small">notifications</Icon>,
     route: "/notifications",
-    component: <Notifications />,
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <Notifications />
+      </ProtectedRoute>
+    ),
   },
   {
     type: "collapse",
@@ -111,15 +135,11 @@ const routes = [
     key: "profile",
     icon: <Icon fontSize="small">person</Icon>,
     route: "/profile",
-    component: <Profile />,
-  },
-  {
-    type: "collapse",
-    name: "Sign In",
-    key: "sign-in",
-    icon: <Icon fontSize="small">login</Icon>,
-    route: "/auth/login",
-    component: <Login />,
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <Profile />
+      </ProtectedRoute>
+    ),
   },
   {
     type: "examples",
@@ -127,7 +147,11 @@ const routes = [
     key: "user-profile",
     icon: <Icon fontSize="small">person</Icon>,
     route: "/user-profile",
-    component: <UserProfile />,
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <UserProfile />
+      </ProtectedRoute>
+    ),
   },
   {
     type: "examples",
@@ -135,22 +159,17 @@ const routes = [
     key: "user-management",
     icon: <Icon fontSize="small">list</Icon>,
     route: "/user-management",
-    component: <UserManagement />,
+    component: (
+      <ProtectedRoute requiredRoles={["admin"]}>
+        <UserManagement />
+      </ProtectedRoute>
+    ),
   },
-  {
-    type: "collapse",
-    name: "Sign Up",
-    key: "sign-up",
-    icon: <Icon fontSize="small">assignment</Icon>,
-    route: "/auth/login",
-    component: <Login />,
-  },
-  
   {
     type: "auth",
     name: "Register",
     key: "register",
-    icon: <Icon fontSize="small">reigster</Icon>,
+    icon: <Icon fontSize="small">app_registration</Icon>,
     route: "/auth/register",
     component: <Register />,
   },
@@ -158,7 +177,7 @@ const routes = [
     type: "auth",
     name: "Forgot Password",
     key: "forgot-password",
-    icon: <Icon fontSize="small">assignment</Icon>,
+    icon: <Icon fontSize="small">lock_reset</Icon>,
     route: "/auth/forgot-password",
     component: <ForgotPassword />,
   },
@@ -166,7 +185,7 @@ const routes = [
     type: "auth",
     name: "Reset Password",
     key: "reset-password",
-    icon: <Icon fontSize="small">assignment</Icon>,
+    icon: <Icon fontSize="small">lock_open</Icon>,
     route: "/auth/reset-password",
     component: <ResetPassword />,
   },

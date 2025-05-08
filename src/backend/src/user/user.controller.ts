@@ -31,8 +31,8 @@ export class UserController {
   // Actualizar un usuario
   @Put('updateUsers/:id')  // Corregido: agregar `:id` para actualizar un usuario específico
   async updateUser(@Param('id') id: string, @Body() updateData: UpdateUserDto): Promise<User> {
-    const{user_name,name,lastname,email}=updateData
-    return this.userService.update(id, user_name,name,lastname,email);
+    const{user_name,name,rol,lastname,email}=updateData
+    return this.userService.update(id, user_name,name,rol,lastname,email);
   }
 
   // Eliminar un usuario

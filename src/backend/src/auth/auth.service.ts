@@ -51,9 +51,12 @@ export class AuthService {
     // Generar token JWT
     const payload = { id: user._id, user: user.user_name };
     const token = this.jwtService.sign(payload);
+    console.log(user.rol);
 
     return {
       id:user._id,
+      user_name:user.user_name,
+      role:user.rol,
       token_type: 'Bearer',
       expires_in: '24h',
       access_token: token,

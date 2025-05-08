@@ -32,10 +32,10 @@ export class UserService {
 
   // Crear un nuevo usuario
   async create(userData: Partial<User>): Promise<User> {
-    const { name, user_name, lastname, email, password, ci } = userData;
+    const { user_name,name, rol, lastname, email, password, ci } = userData;
 
     // Validar campos obligatorios
-    if (!name || !user_name || !lastname || !email || !password || !ci) {
+    if (!name || !user_name || !lastname || !email || !password || !ci || ! rol) {
         throw new HttpException('Faltan campos obligatorios', HttpStatus.BAD_REQUEST);
     }
 
@@ -78,6 +78,7 @@ export class UserService {
     const newUser = new this.userModel({
         user_name,
         name,
+        rol,
         lastname,
         ci,
         email,
@@ -93,6 +94,7 @@ export class UserService {
       id: string,
       user_name: string,
       name: string,
+      rol:string,
       last_name: string,
       email: string,
     
@@ -103,6 +105,7 @@ export class UserService {
           $set: {
             user_name,
             name,
+            rol,
             last_name,
             email,
           },

@@ -28,6 +28,7 @@ export class SeedService implements OnApplicationBootstrap {
 
       const user = new this.userModel({
         user_name: 'Admin',
+        rol:'admin',
         name: 'Admin',
         lastname: 'Admin',
         ci: '0000000000',

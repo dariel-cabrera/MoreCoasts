@@ -54,7 +54,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 // Función para actualizar datos
 export const actualizarDatos = async ({ user, getDatos, limpiarDatos }) => {
   
-  const { id, user_name,name,lastname,email} = user;
+  const { id, user_name,name,rol,lastname,email} = user;
   console.log(id,user);
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -76,7 +76,7 @@ export const actualizarDatos = async ({ user, getDatos, limpiarDatos }) => {
 
   if (result.isConfirmed) {
     try {
-      await actualizar(id,user_name,name,lastname,email);
+      await actualizar(id,user_name,name,rol,lastname,email);
       await getDatos();
       limpiarDatos();
       DataTrazas.crear({accion: 'Ha actualizado un usuario'});
@@ -105,7 +105,7 @@ export const actualizarDatos = async ({ user, getDatos, limpiarDatos }) => {
 // Función para calcular y crear datos
 export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
   console.log(user);
-  const { user_name,name,lastname,email,password,ci}= user;
+  const { user_name,name,lastname,rol,email,password,ci}= user;
 
   if (!user_name || !name || !lastname || !email || !password || !ci) {
     Swal.fire({
@@ -117,7 +117,7 @@ export const crearDatos = async ({ user, getDatos, limpiarDatos }) => {
   }
 
   try {
-    await crear(user_name,name,lastname,email,password,ci);
+    await crear(user_name,name,rol,lastname,email,password,ci);
     await getDatos();
     DataTrazas.crear({accion: 'Ha creado un usuario'});
     Swal.fire({
