@@ -90,11 +90,11 @@ export const ExportToExcel = () => {
          
       >
         <img 
-        src="/images/expotToExcel.png" // Ajusta la ruta
+        src="/images/export.png" // Ajusta la ruta
         alt="Exportar a Excel"
         style={{ 
-          width: '50px', 
-          height: '50px',
+          width: '25x', 
+          height: '25px',
           opacity: isLoading ? 0.5 : 1 // Opacidad al cargar
         }}
       />

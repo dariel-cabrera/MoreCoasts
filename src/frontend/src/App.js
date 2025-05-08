@@ -54,8 +54,8 @@ import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "co
 // Images
 // Se importan imágenes para el logo de 
 // la aplicación en modo claro y oscuro.
-import brandWhite from "assets/images/logo-ct.png";
-import brandDark from "assets/images/logo-ct-dark.png";
+import brandWhite from "assets/images/MoreCoastIco.png";
+import brandDark from "assets/images/MoreCoastIco.png";
 
 //     Se importan componentes y utilidades adicionales, como:
 // setupAxiosInterceptors: Para manejar interceptores de Axios (por ejemplo, 
