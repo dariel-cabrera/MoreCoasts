@@ -14,12 +14,13 @@ import { AuthContext } from "context";
 import DataTrazas from "layouts/trazas/DataTrazas";
 
 function Login() {
-  const authContext = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
+
   const [credentialsError, setCredentialsError] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [inputs, setInputs] = useState({
-    user_name: "Admin",
-    password: "secret",
+    user_name: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({
@@ -27,22 +28,37 @@ function Login() {
     passwordError: false,
   });
 
-  const handleSetRememberMe = () => setRememberMe(!rememberMe);
+  const handleSetRememberMe = () => setRememberMe((prev) => !prev);
 
   const changeHandler = (e) => {
-    setInputs({
-      ...inputs,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setInputs((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [`${name}Error`]: false }));
+    setCredentialsError(null);
+  };
+
+  const validateInputs = () => {
+    let valid = true;
+    let newErrors = { userError: false, passwordError: false };
+
+    if (!inputs.user_name.trim()) {
+      newErrors.userError = true;
+      valid = false;
+    }
+
+    if (inputs.password.trim().length < 6) {
+      newErrors.passwordError = true;
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (inputs.password.trim().length < 6) {
-      setErrors((prev) => ({ ...prev, passwordError: true }));
-      return;
-    }
+    if (!validateInputs()) return;
 
     const loginData = {
       data: {
@@ -56,13 +72,16 @@ function Login() {
 
     try {
       const response = await AuthService.login(loginData);
+      console.log(response);
 
-      // Extraer datos esperados
-      const { user_name, role, access_token, refresh_token } = response;
+      const { access_token, role, user_name } = response;
+      console.log(user_name,access_token,role);
 
-      // ✅ Corregido: userData debe ser objeto
-      // ✅ Normaliza el rol a minúsculas si es necesario
-      //authContext.login(access_token, role.toLowerCase(), { user_name });
+      if (!access_token || !role) {
+        throw new Error("Faltan datos en la respuesta del servidor.");
+      }
+
+      login(access_token, role.toLowerCase(), { user_name });
 
       DataTrazas.crear({ accion: "Se ha autenticado" });
     } catch (res) {
@@ -70,9 +89,9 @@ function Login() {
       if (res?.message) {
         setCredentialsError(res.message);
       } else if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-        setCredentialsError(res.errors[0].detail || "Error desconocido.");
+        setCredentialsError(res.errors[0].detail || "Credenciales inválidas.");
       } else {
-        setCredentialsError("Error inesperado. Inténtalo de nuevo.");
+        setCredentialsError("Error inesperado. Intenta nuevamente.");
       }
     }
   };
@@ -102,8 +121,8 @@ function Login() {
                 type="text"
                 label="Usuario"
                 fullWidth
-                value={inputs.user_name}
                 name="user_name"
+                value={inputs.user_name}
                 onChange={changeHandler}
                 error={errors.userError}
               />

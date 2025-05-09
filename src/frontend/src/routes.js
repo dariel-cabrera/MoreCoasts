@@ -129,6 +129,17 @@ const routes = [
       </ProtectedRoute>
     ),
   },
+   {
+    type: "collapse",
+    name: "Sign In",
+    key: "sign-in",
+    icon: <Icon fontSize="small">login</Icon>,
+    route: "/auth/login",
+    component: 
+    <ProtectedRoute requiredRoles={["admin","worker"]}>
+    <Login />
+    </ProtectedRoute>
+  },
   {
     type: "collapse",
     name: "Profile",

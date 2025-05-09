@@ -24,7 +24,7 @@ import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "co
 import brandWhite from "assets/images/MoreCoastIco.png";
 import brandDark from "assets/images/MoreCoastIco.png";
 
-import { setupAxiosInterceptors } from "./services/interceptor";
+import { setupAxiosInterceptors } from "services/interceptor";
 import ProtectedRoute from "examples/ProtectedRoute";
 import ForgotPassword from "auth/forgot-password";
 import ResetPassword from "auth/reset-password";
@@ -33,7 +33,6 @@ import Register from "auth/register";
 import { AuthContext } from "context";
 import UserProfile from "layouts/user-profile";
 import UserManagement from "layouts/user-management";
-import { Helmet } from "react-helmet";
 
 export default function App() {
   const authContext = useContext(AuthContext);
@@ -46,19 +45,31 @@ export default function App() {
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [rtlCache, setRtlCache] = useState(null);
   const { pathname } = useLocation();
-  const [isDemo, setIsDemo] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setIsDemo(process.env.REACT_APP_IS_DEMO === "false");
-  }, []);
-
-  useMemo(() => {
     const cacheRtl = createCache({
       key: "rtl",
       stylisPlugins: [rtlPlugin],
     });
     setRtlCache(cacheRtl);
   }, []);
+
+  useEffect(() => {
+    document.body.setAttribute("dir", direction);
+  }, [direction]);
+
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.scrollingElement.scrollTop = 0;
+  }, [pathname]);
+
+  useEffect(() => {
+    setupAxiosInterceptors(() => {
+      authContext.logout();
+      navigate("/auth/login");
+    });
+  }, [authContext, navigate]);
 
   const handleOnMouseEnter = () => {
     if (miniSidenav && !onMouseEnter) {
@@ -76,80 +87,47 @@ export default function App() {
 
   const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
 
-  const navigate = useNavigate();
-  setupAxiosInterceptors(() => {
-    authContext.logout();
-    navigate("/auth/login");
-  });
-
-  useEffect(() => {
-    document.body.setAttribute("dir", direction);
-  }, [direction]);
-
-  useEffect(() => {
-    document.documentElement.scrollTop = 0;
-    document.scrollingElement.scrollTop = 0;
-  }, [pathname]);
-
-  // Filtrar rutas según rol
-  const getAccessibleRoutes = (allRoutes) => {
-    const { user } = authContext;
-    const userRole = user?.role;
+   const getAccessibleRoutes = (allRoutes) => {
+    if (authContext.isLoading) return []; // No mostrar rutas mientras se carga
+    
+    if (!authContext.isAuthenticated) {
+    return allRoutes.filter(route => route.type === "auth");
+    }
+    
+    const userRole = authContext.userRole?.toLowerCase();
 
     return allRoutes.filter((route) => {
-      if (route.type === "auth") return true; // siempre accesibles
+      if (route.type === "auth") return false; // No mostrar rutas de auth cuando está autenticado
+
       if (!userRole) return false;
-      if (userRole === "Administrador") return true;
-      if (userRole === "Trabajador") {
-        return ["calculation", "ubicacion"].includes(route.key);
+
+      if (userRole === "admin") {
+        return true;
+      } 
+      if (userRole === "worker") {
+        return ["dashboard", "calculation", "ubicacion"].includes(route.key);
       }
+
       return false;
     });
   };
+  
+  const renderRoutes = (allRoutes) =>
+    allRoutes.flatMap((route) => {
+      if (route.collapse) return renderRoutes(route.collapse);
 
-  const getRoutes = (allRoutes) =>
-    getAccessibleRoutes(allRoutes).map((route) => {
-      if (route.collapse) {
-        return getRoutes(route.collapse);
-      }
       if (route.route && route.type !== "auth") {
         return (
           <Route
-            exact
-            path={route.route}
-            element={
-              <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
-                {route.component}
-              </ProtectedRoute>
-            }
             key={route.key}
+            path={route.route}
+            element={<ProtectedRoute>{route.component}</ProtectedRoute>}
           />
         );
       }
-      return null;
-    });
 
-  const configsButton = (
-    <MDBox
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      width="3.25rem"
-      height="3.25rem"
-      bgColor="white"
-      shadow="sm"
-      borderRadius="50%"
-      position="fixed"
-      right="2rem"
-      bottom="2rem"
-      zIndex={99}
-      color="dark"
-      sx={{ cursor: "pointer" }}
-      onClick={handleConfiguratorOpen}
-    >
-      <Icon fontSize="small" color="inherit">settings</Icon>
-    </MDBox>
-  );
+      return [];
+    });
 
   const commonRoutes = (
     <>
@@ -163,81 +141,77 @@ export default function App() {
   const protectedRoutes = (
     <>
       <Route
-        exact
         path="/user-profile"
-        element={
-          <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
-            <UserProfile />
-          </ProtectedRoute>
-        }
-        key="user-profile"
+        element={<ProtectedRoute><UserProfile /></ProtectedRoute>}
       />
       <Route
-        exact
         path="/user-management"
-        element={
-          <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
-            <UserManagement />
-          </ProtectedRoute>
-        }
-        key="user-management"
+        element={<ProtectedRoute><UserManagement /></ProtectedRoute>}
       />
     </>
   );
 
-  return (
+  const appContent = (
     <>
-      {direction === "rtl" ? (
-        <CacheProvider value={rtlCache}>
-          <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
-            <CssBaseline />
-            {layout === "dashboard" && (
-              <>
-                <Sidenav
-                  color={sidenavColor}
-                  brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                  brandName="MoreCoast"
-                  routes={getAccessibleRoutes(routes)}
-                  onMouseEnter={handleOnMouseEnter}
-                  onMouseLeave={handleOnMouseLeave}
-                />
-                <Configurator />
-                {configsButton}
-              </>
-            )}
-            <Routes>
-              {commonRoutes}
-              {protectedRoutes}
-              {getRoutes(routes)}
-              <Route path="*" element={<Navigate to="/auth/login" />} />
-            </Routes>
-          </ThemeProvider>
-        </CacheProvider>
-      ) : (
-        <ThemeProvider theme={darkMode ? themeDark : theme}>
-          <CssBaseline />
-          {layout === "dashboard" && (
-            <>
-              <Sidenav
-                color={sidenavColor}
-                brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-                brandName="MoreCoast"
-                routes={getAccessibleRoutes(routes)}
-                onMouseEnter={handleOnMouseEnter}
-                onMouseLeave={handleOnMouseLeave}
-              />
-              <Configurator />
-              {configsButton}
-            </>
-          )}
-          <Routes>
-            {commonRoutes}
-            {protectedRoutes}
-            {getRoutes(routes)}
-            <Route path="*" element={<Navigate to="/auth/login" />} />
-          </Routes>
-        </ThemeProvider>
+      {layout === "dashboard" && (
+        <>
+          <Sidenav
+            color={sidenavColor}
+            brand={
+              (transparentSidenav && !darkMode) || whiteSidenav
+                ? brandDark
+                : brandWhite
+            }
+            brandName="MoreCoast"
+            routes={getAccessibleRoutes(routes)}
+            onMouseEnter={handleOnMouseEnter}
+            onMouseLeave={handleOnMouseLeave}
+          />
+          <Configurator />
+          <MDBox
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            width="3.25rem"
+            height="3.25rem"
+            bgColor="white"
+            shadow="sm"
+            borderRadius="50%"
+            position="fixed"
+            right="2rem"
+            bottom="2rem"
+            zIndex={99}
+            color="dark"
+            sx={{ cursor: "pointer" }}
+            onClick={handleConfiguratorOpen}
+          >
+            <Icon fontSize="small" color="inherit">settings</Icon>
+          </MDBox>
+        </>
       )}
+
+
+
+      <Routes>
+        {commonRoutes}
+        {protectedRoutes}
+        {renderRoutes(getAccessibleRoutes(routes))}
+        <Route path="*" element={<Navigate to="/auth/login" />} />
+      </Routes>
     </>
+  );
+
+  return direction === "rtl" ? (
+    <CacheProvider value={rtlCache}>
+      <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
+        <CssBaseline />
+        {appContent}
+      </ThemeProvider>
+    </CacheProvider>
+  ) : (
+    <ThemeProvider theme={darkMode ? themeDark : theme}>
+      <CssBaseline />
+      {appContent}
+    </ThemeProvider>
   );
 }

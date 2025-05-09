@@ -6,9 +6,14 @@ const ProtectedRoute = ({
   children,
   redirectPath = "/auth/login",
   unauthorizedPath = "/unauthorized",
-  requiredRoles = [], // Ej: ['admin', 'worker']
+  requiredRoles = [],
 }) => {
-  const { isAuthenticated, userRole } = useContext(AuthContext);
+  const { isAuthenticated, userRole, isLoading } = useContext(AuthContext);
+
+  // Mostrar nada mientras se carga el estado de autenticación
+  if (isLoading) {
+    return null;
+  }
 
   // 🔒 Usuario no autenticado → redirige al login
   if (!isAuthenticated) {
@@ -18,13 +23,13 @@ const ProtectedRoute = ({
   // 🛑 Usuario autenticado, pero sin los roles requeridos
   if (
     requiredRoles.length > 0 &&
-    (!userRole || !requiredRoles.includes(userRole))
+    (!userRole || !requiredRoles.map(r => r.toLowerCase()).includes(userRole.toLowerCase()))
   ) {
     return <Navigate to={unauthorizedPath} replace />;
   }
 
   // ✅ Autenticado y con rol autorizado
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
