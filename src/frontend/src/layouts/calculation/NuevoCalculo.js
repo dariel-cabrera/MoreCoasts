@@ -25,7 +25,7 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
         // Transformar las ubicaciones a un array de objetos { id, nombre }
         const ubicacionesFormateadas = Array.isArray(datos)
           ? datos.map(area => ({
-              id:area._id,
+              id: area._id,
               nombre: area.nombre || 'Sin nombre',
             }))
           : [];
@@ -46,9 +46,12 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
 
     switch (name) {
       case "densidad_a":
+        if (numValue <= 1000) return "La densidad del sedimento debe ser mayor a 1000";
+        if (numValue > 3000) return "La densidad del sedimento debe ser menor a 3000";
+        break;
       case "densidad_m":
-        if (numValue <= 0) return "La densidad debe ser mayor a 0";
-        if (numValue > 3000) return "Valor de densidad demasiado alto";
+        if (numValue <= 1000) return "La densidad del mar debe ser mayor a 1000";
+        if (numValue > 2000) return "La densidad del mar debe ser menor a 2000";
         break;
       case "coeficiente":
         if (numValue < 0) return "No puede ser negativo";
@@ -64,8 +67,8 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
         if (numValue < 0 || numValue > 90) return "Ángulo debe estar entre 0° y 90°";
         break;
       case "aceleracion":
-        if (numValue <= 0) return "Debe ser mayor a 0";
-        if (numValue > 20) return "Valor demasiado alto";
+        if (numValue <= 9.7) return "Debe ser mayor a 0";
+        if (numValue > 9.90) return "Valor demasiado alto";
         break;
       case "P":
         if (numValue < 0) return "No puede ser negativo";
@@ -145,14 +148,14 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
 
         <Grid container spacing={2}>
           {[
-            { label: "Densidad de Arena (kg/m³)", name: "densidad_a", min: 0.1, max: 3000 },
-            { label: "Densidad del Mar (kg/m³)", name: "densidad_m", min: 0.1, max: 3000 },
-            { label: "Coeficiente de Porosidad", name: "coeficiente", min: 0, max: 1, step: 0.01 },
-            { label: "Índice", name: "indice", min: 0 },
-            { label: "Altura (m)", name: "altura", min: 0.01 },
-            { label: "Ángulo (°)", name: "angulo", min: 0, max: 90 },
-            { label: "Aceleración de la Gravedad (m/s²)", name: "aceleracion", min: 0.1, max: 20 },
-            { label: "Medición Práctica (P)", name: "P", min: 0 },
+            { label: "Densidad del sedimento (ρs) [kg/m³]", name: "densidad_a", min: 1000, max: 3000 },
+            { label: "Densidad del Mar (ρ) [kg/m³]", name: "densidad_m", min: 1000, max: 2000 },
+            { label: "Coeficiente de Porosidad (n) ", name: "coeficiente", min: 0, max: 1, step: 0.01 },
+            { label: "Índice de Rompiente (k) ", name: "indice", min: 0, max:2, step: 0.01 },
+            { label: "Altura (Hb) [m]", name: "altura", min: 0.1 },
+            { label: "Ángulo (α) [°]", name: "angulo", min: 0, max: 90 },
+            { label: "Aceleración de la Gravedad (g) [m/s²]", name: "aceleracion", min: 9.70, max: 9.90 },
+            { label: "Medición Práctica (P) [m³]", name: "P", min: 0 },
           ].map((item, index) => (
             <Grid item xs={6} key={item.name}>
               <MDBox mt={2} sx={{ width: "100%", maxWidth: 300, mb: index === 7 ? 6 : 0 }}>
@@ -176,36 +179,38 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
             </Grid>
           ))}
 
-          {/* Campo de ubicación */}
+          {/* Campo de ubicación con botón al lado */}
           <Grid item xs={6}>
-            <FormControl fullWidth sx={{ mt: 4, maxWidth: 300 }}>
-              <InputLabel id="ubicacion-label">Ubicación</InputLabel>
-              <Select
-                labelId="ubicacion-label"
-                id="ubicacion"
-                value={calculo.ubicacion || ""}
-                label="Ubicación"
-                onChange={(e) =>
-                  setCalculo({ ...calculo, ubicacion: e.target.value })
-                }
+            <MDBox mt={2} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <FormControl sx={{ width: "100%", maxWidth: 300 }}>
+                <InputLabel id="ubicacion-label">Ubicación</InputLabel>
+                <Select
+                  labelId="ubicacion-label"
+                  id="ubicacion"
+                  value={calculo.ubicacion || ""}
+                  label="Ubicación"
+                  onChange={(e) =>
+                    setCalculo({ ...calculo, ubicacion: e.target.value })
+                  }
+                  sx={{ width: "100%" }}
+                >
+                  {ubicaciones.map((ubi) => (
+                    <MenuItem key={ubi.id} value={ubi.nombre}>
+                      {ubi.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <MDButton
+                variant="outlined"
+                color="info"
+                onClick={() => window.open("/mapa", "_blank")}
+                sx={{ height: "56px", mt: "8px" }} // Ajuste de altura para alinearse con el input
               >
-                {ubicaciones.map((ubi) => (
-                  <MenuItem key={ubi.id} value={ubi.nombre}>
-                    {ubi.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={2} sx={{ display: "flex", alignItems: "center", mt: 4 }}>
-            <MDButton
-              variant="outlined"
-              color="info"
-              onClick={() => window.open("/mapa", "_blank")}
-            >
-              Ir al mapa
-            </MDButton>
+                Ir al mapa
+              </MDButton>
+            </MDBox>
           </Grid>
         </Grid>
 

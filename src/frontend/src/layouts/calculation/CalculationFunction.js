@@ -104,9 +104,9 @@ export const calcularDatos = async ({ calculo, getDatos, limpiarDatos }) => {
     return;
   }
 
-  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
+  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion } = calculo;
 
-  if (!densidad_a || !densidad_m || !indice || !coeficiente || !altura || !angulo || !aceleracion || !P) {
+  if (!densidad_a || !densidad_m || !indice || !coeficiente || !altura || !angulo || !aceleracion || !P || !ubicacion) {
     Swal.fire({
       icon: 'error',
       title: 'Error',
@@ -114,9 +114,17 @@ export const calcularDatos = async ({ calculo, getDatos, limpiarDatos }) => {
     });
     return;
   }
+  if (densidad_a  < densidad_m ) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'La Densidad del Mar no puede ser mayor a la Densidad del Sedimento.'
+    });
+    return;
+  }
 
   try {
-    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion);
     await getDatos();
     Swal.fire({
       position: "top-end",

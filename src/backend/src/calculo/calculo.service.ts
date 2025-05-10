@@ -6,6 +6,7 @@ import * as ExcelJS from 'exceljs';
 import { TrazasService } from 'src/trazas/trazas.service';
 import { Response } from 'express';
 import { IReporteGenerador} from "src/report/interface/report.interface";
+import { format } from 'date-fns';
 
 @Injectable()
 export class CalculoService {
@@ -27,8 +28,14 @@ export class CalculoService {
     Q: number,
     P: number,
     K: number,
-    idUser: string
+    idUser: string,
+    ubicacion:string,
+    
   ): Promise<Calculation> {
+
+    const formattedDate = format(new Date(), 'yyyy-MM-dd'); // Siempre devuelve string
+    console.log(formattedDate); // "2023-12-25" (sin hora)
+
     try {
       const nuevoDato = new this.datosModel({
         densidad_a,
@@ -41,6 +48,8 @@ export class CalculoService {
         Q,
         P,
         K,
+        ubicacion,
+        fecha: formattedDate,
       });
       
       await this.trazasService.createTrazas('Ha realizado un cálculo', idUser);

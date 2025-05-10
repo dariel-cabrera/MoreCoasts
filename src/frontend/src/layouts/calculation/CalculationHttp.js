@@ -61,7 +61,8 @@ export const crear = async (
     altura,
     angulo,
     aceleracion,
-    P
+    P,
+    ubicacion,
 ) => {
     const Q = calculando_Q(denArena, denMar, indice, coeficiente, altura, angulo, aceleracion);
     const K = calculando_K(P, Q);
@@ -77,6 +78,7 @@ export const crear = async (
         P,
         Q,
         K,
+        ubicacion
     };
 
     try {

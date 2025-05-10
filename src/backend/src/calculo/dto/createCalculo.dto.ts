@@ -41,5 +41,9 @@ export class CreateCalculoDto{
         @IsNotEmpty()
         K:number
 
+        @IsString()
+        @IsNotEmpty()
+        ubicacion:string
+
 
 }

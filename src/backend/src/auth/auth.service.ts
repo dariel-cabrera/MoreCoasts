@@ -10,7 +10,6 @@ import * as randomToken from 'random-token';
 import { User } from 'src/user/shema/user.shema';
 import { PasswordReset, PasswordResetDocument } from '../user/shema/password-reset.schema';
 
-
 @Injectable()
 export class AuthService {
   private transporter: nodemailer.Transporter;

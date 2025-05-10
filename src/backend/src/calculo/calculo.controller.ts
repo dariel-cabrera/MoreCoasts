@@ -38,6 +38,7 @@ export class CalculoController {
           Q,
           P,
           K,
+          ubicacion,
           
         } = calculo;
         const idUser = request['userId'];
@@ -52,7 +53,8 @@ export class CalculoController {
           Q,
           P,
           K,
-          idUser
+          idUser,
+          ubicacion
         );
       }
       @UseGuards(JwtAuthGuard) // Asegura que el token sea válido

@@ -26,6 +26,7 @@ function Calculation() {
     angulo: 0,
     aceleracion: 0,
     P: 0,
+    ubicacion:"",
   });
   
   
@@ -59,6 +60,7 @@ function Calculation() {
       aceleracion: 0,
       P: 0,
       id: 0,
+      ubicacion:"",
     });
     setEditar(false);
     setMstNvoCalc(false);
@@ -78,6 +80,7 @@ function Calculation() {
       aceleracion: val.aceleracion,
       P: val.P,
       id: val._id,
+      ubicacion: val.ubicacion
     });
   };
 

@@ -32,6 +32,13 @@ export class Calculation {
 
   @Prop({ type: Number, required: true })
   K: number;
+  
+  @Prop({ type: String, required: true })
+  ubicacion: string;
+
+  @Prop({ type: String, default: Date.now })
+  fecha:string;
+
 }
 
 // ✅ Se exporta con un nombre coherente
