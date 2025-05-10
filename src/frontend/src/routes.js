@@ -13,6 +13,7 @@ import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+import LogoutButton from "layouts/logout";
 
 import UserProfile from "layouts/user-profile";
 import UserManagement from "layouts/user-management";
@@ -32,6 +33,7 @@ import UserImg from "assets/images/user.png";
 import CalculationImg from "assets/images/calculation.png";
 import InicioImg from "assets/images/inicio.png";
 import UbicacionImg from "assets/images/ubicacion.png"
+import { Logout } from "@mui/icons-material";
 
 const ImageIcon = ({ src, alt, fontSize = "small" }) => {
   const size = fontSize === "small" ? 20 : 25;
@@ -131,14 +133,17 @@ const routes = [
   },
    {
     type: "collapse",
-    name: "Sign In",
-    key: "sign-in",
+    name: "Salir",
+    key: "salir",
     icon: <Icon fontSize="small">login</Icon>,
-    route: "/auth/login",
+    route: "/logout",
     component: 
-    <ProtectedRoute requiredRoles={["admin","worker"]}>
-    <Login />
-    </ProtectedRoute>
+    <ProtectedRoute requiredRoles={["admin", "worker"]}>
+        <Logout/>
+      </ProtectedRoute>
+
+    
+    
   },
   {
     type: "collapse",

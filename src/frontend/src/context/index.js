@@ -37,14 +37,15 @@ const AuthContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const logout = () => {
-    // Limpiar todo el almacenamiento local relacionado con la autenticación
+ const logout = () => {
+  try {
+    // Limpiar almacenamiento
     localStorage.removeItem("token");
     localStorage.removeItem("userRole");
     localStorage.removeItem("userData");
     localStorage.removeItem("lastAuthTime");
 
-    // Resetear el estado
+    // Resetear estado
     setState({
       isAuthenticated: false,
       userRole: null,
@@ -52,9 +53,16 @@ const AuthContextProvider = ({ children }) => {
       isLoading: false,
     });
 
-    // Redirigir al login y forzar recarga para limpiar estado
+    // Redirigir usando navigate (mejor para SPAs)
+    navigate("/auth/login", { replace: true });
+    
+    console.log("Sesión cerrada correctamente");
+  } catch (error) {
+    console.error("Error en logout:", error);
+    // Forzar recarga como fallback
     window.location.href = "/auth/login";
-  };
+  }
+};
 
   useLayoutEffect(() => {
     const validateAuth = async () => {

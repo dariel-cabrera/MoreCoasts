@@ -1,29 +1,22 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
-
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
-
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
-
 import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
 import themeDark from "assets/theme-dark";
 import themeDarkRTL from "assets/theme-dark/theme-rtl";
-
 import rtlPlugin from "stylis-plugin-rtl";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
-
 import routes from "routes";
 import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "context";
-
 import brandWhite from "assets/images/MoreCoastIco.png";
 import brandDark from "assets/images/MoreCoastIco.png";
-
 import { setupAxiosInterceptors } from "services/interceptor";
 import ProtectedRoute from "examples/ProtectedRoute";
 import ForgotPassword from "auth/forgot-password";
@@ -47,6 +40,7 @@ export default function App() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
+  // Cache RTL
   useEffect(() => {
     const cacheRtl = createCache({
       key: "rtl",
@@ -55,21 +49,27 @@ export default function App() {
     setRtlCache(cacheRtl);
   }, []);
 
+  // Efecto para dirección
   useEffect(() => {
     document.body.setAttribute("dir", direction);
   }, [direction]);
 
+  // Efecto para scroll al cambiar de ruta
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
   }, [pathname]);
 
+  /*// Configurar interceptores de axios
   useEffect(() => {
-    setupAxiosInterceptors(() => {
+    const logoutAndRedirect = () => {
       authContext.logout();
-      navigate("/auth/login");
-    });
-  }, [authContext, navigate]);
+      // Forzar recarga completa para limpiar el estado
+      window.location.href = "/auth/login";
+    };
+    
+    setupAxiosInterceptors(logoutAndRedirect);
+  }, [authContext]);*/
 
   const handleOnMouseEnter = () => {
     if (miniSidenav && !onMouseEnter) {
@@ -87,25 +87,28 @@ export default function App() {
 
   const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
 
-   const getAccessibleRoutes = (allRoutes) => {
-    if (authContext.isLoading) return []; // No mostrar rutas mientras se carga
+  const getAccessibleRoutes = (allRoutes) => {
+    if (authContext.isLoading) return [];
     
+    // Si no está autenticado, solo mostrar rutas públicas
     if (!authContext.isAuthenticated) {
-    return allRoutes.filter(route => route.type === "auth");
+      return allRoutes.filter(route => route.type === "auth");
     }
     
     const userRole = authContext.userRole?.toLowerCase();
 
     return allRoutes.filter((route) => {
-      if (route.type === "auth") return false; // No mostrar rutas de auth cuando está autenticado
+      // No mostrar rutas de auth cuando está autenticado
+      if (route.type === "auth") return false;
 
       if (!userRole) return false;
 
-      if (userRole === "admin") {
-        return true;
-      } 
+      // Rutas accesibles para admin
+      if (userRole === "admin") return true;
+      
+      // Rutas accesibles para worker
       if (userRole === "worker") {
-        return ["dashboard", "calculation", "ubicacion"].includes(route.key);
+        return ["dashboard", "calculation", "ubicacion","salir"].includes(route.key);
       }
 
       return false;
@@ -121,12 +124,16 @@ export default function App() {
           <Route
             key={route.key}
             path={route.route}
-            element={<ProtectedRoute>{route.component}</ProtectedRoute>}
+            element={
+              <ProtectedRoute requiredRoles={route.requiredRoles}>
+                {route.component}
+              </ProtectedRoute>
+            }
           />
         );
       }
 
-      return [];
+      return null;
     });
 
   const commonRoutes = (
@@ -142,18 +149,26 @@ export default function App() {
     <>
       <Route
         path="/user-profile"
-        element={<ProtectedRoute><UserProfile /></ProtectedRoute>}
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <UserProfile />
+          </ProtectedRoute>
+        }
       />
       <Route
         path="/user-management"
-        element={<ProtectedRoute><UserManagement /></ProtectedRoute>}
+        element={
+          <ProtectedRoute requiredRoles={["admin"]}>
+            <UserManagement />
+          </ProtectedRoute>
+        }
       />
     </>
   );
 
   const appContent = (
     <>
-      {layout === "dashboard" && (
+      {layout === "dashboard" && authContext.isAuthenticated && (
         <>
           <Sidenav
             color={sidenavColor}
@@ -190,13 +205,18 @@ export default function App() {
         </>
       )}
 
-
-
       <Routes>
         {commonRoutes}
         {protectedRoutes}
         {renderRoutes(getAccessibleRoutes(routes))}
-        <Route path="*" element={<Navigate to="/auth/login" />} />
+        <Route 
+          path="*" 
+          element={
+            authContext.isAuthenticated 
+              ? <Navigate to="/dashboard" /> 
+              : <Navigate to="/auth/login" />
+          } 
+        />
       </Routes>
     </>
   );
