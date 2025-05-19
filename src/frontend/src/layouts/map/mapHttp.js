@@ -22,3 +22,14 @@ export const crear = async(currentArea)=>{
             throw error;
     }
 }
+
+export const actualizar = async(id,currentArea)=>{
+    try {
+            const response = await UbicacionService.updateUbicacion(id,currentArea);
+            console.log('Datos actualizados exitosamente:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error al crear los datos:', error.response?.data || error.message);
+            throw error;
+    }
+}

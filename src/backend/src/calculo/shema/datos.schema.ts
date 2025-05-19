@@ -36,8 +36,8 @@ export class Calculation {
   @Prop({ type: String, required: true })
   ubicacion: string;
 
-  @Prop({ type: String, default: Date.now })
-  fecha:string;
+  @Prop({ type: Date, default: Date.now })
+  fecha:Date;
 
 }
 

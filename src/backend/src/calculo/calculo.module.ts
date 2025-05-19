@@ -6,6 +6,8 @@ import { Calculation,CalculationSchema } from "./shema/datos.schema";
 import { TrazasModule } from 'src/trazas/trazas.module';
 import { AuthModule } from "src/auth/auth.module";
 import { ReportesModule } from "src/report/report.module";
+import { ReporteExcelService } from "./reporte/ReporteExcel.service";
+import { EcuacionesService } from "./ecuaciones/ecuaciones.service";
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Calculation.name, schema:  CalculationSchema }]),
@@ -14,8 +16,11 @@ import { ReportesModule } from "src/report/report.module";
     ReportesModule
   ],
    controllers:[CalculoController],
-   providers:[CalculoService],
-  
+   providers:[CalculoService,
+    ReporteExcelService,
+    EcuacionesService
+   ],
+   
 })
 
 export class CalculoModule{}

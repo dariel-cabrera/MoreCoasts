@@ -28,18 +28,12 @@ export class CreateCalculoDto{
         @IsNumber()
         @IsNotEmpty()
         aceleracion:number
-        
-        @IsNumber()
-        @IsNotEmpty()
-        Q:number
 
         @IsNumber()
         @IsNotEmpty()
         P:number
 
-        @IsNumber()
-        @IsNotEmpty()
-        K:number
+       
 
         @IsString()
         @IsNotEmpty()

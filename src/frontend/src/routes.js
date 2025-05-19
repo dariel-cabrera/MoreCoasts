@@ -2,6 +2,7 @@
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
 import Calculation from "layouts/calculation";
+import { Configuracion } from "layouts/configuration";
 import Users from "layouts/users";
 import Trazas from "layouts/trazas";
 import Tables from "layouts/tables";
@@ -30,6 +31,7 @@ import UserImg from "assets/images/user.png";
 import CalculationImg from "assets/images/calculation.png";
 import InicioImg from "assets/images/inicio.png";
 import UbicacionImg from "assets/images/ubicacion.png"
+import AjustesImg from "assets/images/ajustes.png"
 
 const ImageIcon = ({ src, alt, fontSize = "small" }) => {
   const size = fontSize === "small" ? 20 : 25; // Ajusta los tamaños según necesites
@@ -95,6 +97,14 @@ const routes = [
     icon:<ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
     route:"/trazas",
     component:<Trazas />,
+   },
+   {
+    type:"collapse",
+    name:"Configuracion",
+    key:"configuracion",
+    icon:<ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
+    route:"/configuracion",
+    component:<Configuracion />,
    },
  
   {

@@ -1,7 +1,5 @@
 import Swal from 'sweetalert2';
-import { eliminar, actualizar, crear } from './CalculationHttp';
-
-
+import CalculationService from "services/calculation-service";
 
 // Función para eliminar datos
 export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
@@ -25,7 +23,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 
   if (result.isConfirmed) {
     try {
-      await eliminar(idValue); 
+      await CalculationService.deleteCalculation(idValue); 
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
@@ -51,8 +49,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 
 // Función para actualizar datos
 export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) => {
-  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P } = calculo;
-
+  
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -73,7 +70,7 @@ export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) =
 
   if (result.isConfirmed) {
     try {
-      await actualizar(id, densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P);
+      await CalculationService.updateCalculation(id, calculo);
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({
@@ -122,9 +119,9 @@ export const calcularDatos = async ({ calculo, getDatos, limpiarDatos }) => {
     });
     return;
   }
-
+  const data= {densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion}
   try {
-    await crear(densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion);
+    await await CalculationService.postCalculation(data);
     await getDatos();
     Swal.fire({
       position: "top-end",

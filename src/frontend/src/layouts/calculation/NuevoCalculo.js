@@ -1,3 +1,4 @@
+// Importaciones 
 import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -7,14 +8,21 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+
 import { actualizarDatos, calcularDatos } from "./CalculationFunction";
 import { useState, useEffect } from "react";
 import UbicacionService from 'services/ubicacion-service';
+import ConfiguracionService from "services/configuracion-service";
 
+// Compomente Principal
 export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDatos }) => {
+  
+  // Estados del Componente
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [ubicaciones, setUbicaciones] = useState([]);
+  const [configuracion, setConfiguracion] = useState(null);
+  const [loadingConfig, setLoadingConfig] = useState(true);
 
   // Cargar ubicaciones desde la base de datos
   useEffect(() => {
@@ -22,7 +30,6 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
       try {
         const datos = await UbicacionService.getUbicaciones();
   
-        // Transformar las ubicaciones a un array de objetos { id, nombre }
         const ubicacionesFormateadas = Array.isArray(datos)
           ? datos.map(area => ({
               id: area._id,
@@ -39,47 +46,78 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
     obtenerUbicaciones();
   }, []);
   
+  // Cargar configuración
+  useEffect(() => {
+    const cargarConfiguracion = async () => {
+      try {
+        const response = await ConfiguracionService.getConfiguration();
+        console.log("Respuesta completa del servicio:", response);
+        
+        // Verificar si la respuesta es un array y tiene al menos un elemento
+        if (Array.isArray(response) && response.length > 0) {
+          const config = response[0]; // Acceder al primer elemento del array
+          console.log("Configuración extraída:", config);
+          
+          const formattedConfig = {};
+          
+          // Mapeo directo de las propiedades recibidas
+          formattedConfig._id = config._id || "";
+          formattedConfig.densidad_aMin = Number(config.densidad_aMin) || 0;
+          formattedConfig.densidad_aMax = Number(config.densidad_aMax) || 3000;
+          formattedConfig.densidad_mMin = Number(config.densidad_mMin) || 0;
+          formattedConfig.densidad_mMax = Number(config.densidad_mMax) || 2000;
+          formattedConfig.coeficienteMin = Number(config.coeficienteMin) || 0;
+          formattedConfig.coeficienteMax = Number(config.coeficienteMax) || 1;
+          formattedConfig.indiceMin = Number(config.indiceMin) || 0;
+          formattedConfig.indiceMax = Number(config.indiceMax) || 2;
+          formattedConfig.alturaMin = Number(config.alturaMin) || 0.1;
+          formattedConfig.alturaMax = Number(config.alturaMax) || 10;
+          formattedConfig.anguloMin = Number(config.anguloMin) || 0;
+          formattedConfig.anguloMax = Number(config.anguloMax) || 90;
+          formattedConfig.aceleracionMin = Number(config.aceleracionMin) || 9.7;
+          formattedConfig.aceleracionMax = Number(config.aceleracionMax) || 9.9;
+          formattedConfig.PMin = Number(config.PMin) || 0;
+          formattedConfig.PMax = Number(config.PMax) || 100;
+          
+          console.log("Configuración formateada:", formattedConfig);
+          setConfiguracion(formattedConfig);
+        } else {
+          console.error("La configuración no tiene el formato esperado");
+        }
+      } catch (error) {
+        console.error("Error al cargar configuración:", error);
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
+  
+    cargarConfiguracion();
+  }, []);
 
+  // Funciones de Validacion
+  // Si carga la configuracion por defecto
   const validateNumber = (name, value) => {
+    if (!configuracion) return "Configuración no disponible";
+    
+    // Si es un numero
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return "Debe ingresar un número válido";
 
-    switch (name) {
-      case "densidad_a":
-        if (numValue <= 1000) return "La densidad del sedimento debe ser mayor a 1000";
-        if (numValue > 3000) return "La densidad del sedimento debe ser menor a 3000";
-        break;
-      case "densidad_m":
-        if (numValue <= 1000) return "La densidad del mar debe ser mayor a 1000";
-        if (numValue > 2000) return "La densidad del mar debe ser menor a 2000";
-        break;
-      case "coeficiente":
-        if (numValue < 0) return "No puede ser negativo";
-        if (numValue > 1) return "El coeficiente debe ser ≤ 1";
-        break;
-      case "indice":
-        if (numValue < 0) return "No puede ser negativo";
-        break;
-      case "altura":
-        if (numValue <= 0) return "La altura debe ser positiva";
-        break;
-      case "angulo":
-        if (numValue < 0 || numValue > 90) return "Ángulo debe estar entre 0° y 90°";
-        break;
-      case "aceleracion":
-        if (numValue <= 9.7) return "Debe ser mayor a 0";
-        if (numValue > 9.90) return "Valor demasiado alto";
-        break;
-      case "P":
-        if (numValue < 0) return "No puede ser negativo";
-        break;
-      default:
-        return "";
+    const min = configuracion[`${name}Min`];
+    const max = configuracion[`${name}Max`];
+
+    // Si esta dentro de los limites
+    if (typeof min !== 'number' || typeof max !== 'number') {
+      return "Límites no configurados correctamente";
     }
+
+    if (numValue < min) return `El valor debe ser ≥ ${min}`;
+    if (numValue > max) return `El valor debe ser ≤ ${max}`;
 
     return "";
   };
 
+  // Validacion del Formulario
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
@@ -103,9 +141,12 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
   };
 
   useEffect(() => {
-    validateForm();
-  }, [calculo]);
+    if (!loadingConfig) {
+      validateForm();
+    }
+  }, [calculo, configuracion, loadingConfig]);
 
+   // Manejadores de Eventos
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (value === "") {
@@ -118,20 +159,26 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
 
     setCalculo({ ...calculo, [name]: numValue });
   };
-
+  
+   // Valida el campo cuando pierde el foco, 
+   // Actualiza los errores específicos del campo
   const handleBlur = (e) => {
     const { name, value } = e.target;
     const error = validateNumber(name, value);
     setErrors(prev => ({ ...prev, [name]: error }));
   };
 
+  // Envío del Formulario
   const handleSubmit = (action) => {
+    //Valida el formulario antes de enviar
     if (!validateForm()) return;
 
+    //Filtra campos vacíos
     const datosEnviar = Object.fromEntries(
       Object.entries(calculo).filter(([_, v]) => v !== "")
     );
 
+    //Ejecuta la acción correspondiente (calcular o actualizar)
     if (action === "calcular") {
       calcularDatos({ calculo: datosEnviar, getDatos, limpiarDatos });
     } else if (action === "actualizar") {
@@ -139,6 +186,27 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
     }
   };
 
+  //  Renderizado Condicional
+  // Estados de Carga y Error
+  if (loadingConfig) {
+    return (
+      <MDBox sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <MDTypography variant="h6">Cargando configuración...</MDTypography>
+      </MDBox>
+    );
+  }
+
+  if (!configuracion) {
+    return (
+      <MDBox sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <MDTypography variant="h6" color="error">
+          Error al cargar la configuración
+        </MDTypography>
+      </MDBox>
+    );
+  }
+
+  // Renderizado del Formulario
   return (
     <MDBox sx={{ pl: 2 }}>
       <Grid container direction="column">
@@ -146,16 +214,17 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
           Nuevo Cálculo
         </MDTypography>
 
+        {/*Campos del Formulario */}
         <Grid container spacing={2}>
           {[
-            { label: "Densidad del sedimento (ρs) [kg/m³]", name: "densidad_a", min: 1000, max: 3000 },
-            { label: "Densidad del Mar (ρ) [kg/m³]", name: "densidad_m", min: 1000, max: 2000 },
-            { label: "Coeficiente de Porosidad (n) ", name: "coeficiente", min: 0, max: 1, step: 0.01 },
-            { label: "Índice de Rompiente (k) ", name: "indice", min: 0, max:2, step: 0.01 },
-            { label: "Altura (Hb) [m]", name: "altura", min: 0.1 },
-            { label: "Ángulo (α) [°]", name: "angulo", min: 0, max: 90 },
-            { label: "Aceleración de la Gravedad (g) [m/s²]", name: "aceleracion", min: 9.70, max: 9.90 },
-            { label: "Medición Práctica (P) [m³]", name: "P", min: 0 },
+            { label: "Densidad del sedimento (ρs) [kg/m³]", name: "densidad_a", min: configuracion.densidad_aMin || 0, max: configuracion.densidad_aMax || 3000 },
+            { label: "Densidad del Mar (ρ) [kg/m³]", name: "densidad_m", min: configuracion.densidad_mMin || 0, max: configuracion.densidad_mMax || 2000 },
+            { label: "Coeficiente de Porosidad (n) ", name: "coeficiente", min: configuracion.coeficienteMin || 0, max: configuracion.coeficienteMax || 1, step: 0.01 },
+            { label: "Índice de Rompiente (k) ", name: "indice", min: configuracion.indiceMin || 0, max: configuracion.indiceMax || 2, step: 0.01 },
+            { label: "Altura (Hb) [m]", name: "altura", min: configuracion.alturaMin || 0.1, max: configuracion.alturaMax || 10 },
+            { label: "Ángulo (α) [°]", name: "angulo", min: configuracion.anguloMin || 0, max: configuracion.anguloMax || 90 },
+            { label: "Aceleración de la Gravedad (g) [m/s²]", name: "aceleracion", min: configuracion.aceleracionMin || 9.7, max: configuracion.aceleracionMax || 9.9 },
+            { label: "Medición Práctica (P) [m³]", name: "P", min: configuracion.PMin || 0, max: configuracion.PMax || 100 },
           ].map((item, index) => (
             <Grid item xs={6} key={item.name}>
               <MDBox mt={2} sx={{ width: "100%", maxWidth: 300, mb: index === 7 ? 6 : 0 }}>
@@ -179,7 +248,7 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
             </Grid>
           ))}
 
-          {/* Campo de ubicación con botón al lado */}
+           {/*Selector de Ubicación */}
           <Grid item xs={6}>
             <MDBox mt={2} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <FormControl sx={{ width: "100%", maxWidth: 300 }}>
@@ -206,15 +275,15 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
                 variant="outlined"
                 color="info"
                 onClick={() => window.open("/mapa", "_blank")}
-                sx={{ height: "56px", mt: "8px" }} // Ajuste de altura para alinearse con el input
+                sx={{ height: "56px", mt: "8px" }}
               >
                 Ir al mapa
               </MDButton>
             </MDBox>
           </Grid>
         </Grid>
-
-        {/* Botones de acción */}
+        
+        {/*Botones de Acción */}
         <MDBox sx={{ mt: 3, width: "100%" }}>
           <Grid container spacing={2} justifyContent="center">
             {editar ? (

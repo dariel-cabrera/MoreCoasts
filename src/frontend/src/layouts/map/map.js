@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { MapContainer, TileLayer, Polygon, Popup } from 'react-leaflet';
 import { TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, Checkbox, Typography, AppBar, Toolbar, Snackbar, Alert } from '@mui/material';
-import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { FeatureGroup } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import * as yup from 'yup';
 import UbicacionService from 'services/ubicacion-service';
-import { crear, eliminar } from './mapHttp';
+import { crear, eliminar,actualizar } from './mapHttp';
+import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
+import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
+import Footer from 'examples/Footer';
 
 // Esquema de validación para el área
 const areaSchema = yup.object().shape({
@@ -124,8 +126,9 @@ const Mapa = () => {
 
         try {
             setLoading(true);
+            console.log(currentArea)
             if (currentArea._id) {
-                await axios.put(`http://localhost:5000/api/areas/${currentArea._id}`, currentArea);
+                await actualizar(currentArea._id, currentArea);
                 showSnackbar('Área actualizada correctamente');
             } else {
                 await crear(currentArea);
@@ -233,6 +236,8 @@ const Mapa = () => {
     }, [areas]);
 
     return (
+         <DashboardLayout sx={{ width: "100%" }}>
+              <DashboardNavbar />
         <div style={{ height: '100vh', width: '100%' }}>
             <AppBar position="static">
                 <Toolbar>
@@ -247,7 +252,7 @@ const Mapa = () => {
                 </Toolbar>
             </AppBar>
             <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
-                <div style={{ width: '500px', padding: '16px', borderRight: '1px solid #ccc', overflowY: 'auto' }}>
+                <div style={{ width: '300px', padding: '16px', borderRight: '1px solid #ccc', overflowY: 'auto' }}>
                     <Typography variant="h6" gutterBottom>
                         Lista de Áreas ({areas.length})
                     </Typography>
@@ -256,37 +261,58 @@ const Mapa = () => {
                             No hay áreas disponibles
                         </Typography>
                     ) : (
-                        <List>
-                            {areas.map((area) => (
-                                <ListItem key={area._id} dense>
-                                    <Checkbox
-                                        checked={area.visible}
-                                        onChange={() => toggleVisibility(area._id)}
-                                        size="small"
-                                        disabled={loading}
-                                    />
-                                    <ListItemText 
-                                        primary={area.nombre} 
-                                        secondary={area.ciudad} 
-                                    />
-                                    <Button 
-                                        size="small" 
-                                        onClick={() => { setCurrentArea(area); setOpen(true); }}
-                                        disabled={loading}
-                                    >
-                                        Editar
-                                    </Button>
-                                    <Button 
-                                        size="small" 
-                                        onClick={() => handleDelete(area._id)}
-                                        color="error"
-                                        disabled={loading}
-                                    >
-                                        Eliminar
-                                    </Button>
-                                </ListItem>
-                            ))}
-                        </List>
+                    <List>
+                    {areas.map((area) => (
+                        <ListItem key={area._id} dense sx={{ py: 0.5 }}>
+                        <Checkbox
+                            checked={area.visible}
+                            onChange={() => toggleVisibility(area._id)}
+                            size="small"
+                            disabled={loading}
+                            sx={{ p: 0.5 }}
+                        />
+                        <ListItemText 
+                            primary={
+                            <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+                                {area.nombre}
+                            </Typography>
+                            } 
+                            secondary={
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>
+                                {area.ciudad}
+                            </Typography>
+                            } 
+                            sx={{ my: 0 }}
+                        />
+                        <Button 
+                            size="small" 
+                            onClick={() => { setCurrentArea(area); setOpen(true); }}
+                            disabled={loading}
+                            sx={{ 
+                            minWidth: 'auto', 
+                            fontSize: '0.65rem',
+                            p: 0.5,
+                            mx: 0.5
+                            }}
+                        >
+                            Editar
+                        </Button>
+                        <Button 
+                            size="small" 
+                            onClick={() => handleDelete(area._id)}
+                            color="error"
+                            disabled={loading}
+                            sx={{ 
+                            minWidth: 'auto', 
+                            fontSize: '0.65rem',
+                            p: 0.5
+                            }}
+                        >
+                            Eliminar
+                        </Button>
+                        </ListItem>
+                    ))}
+                    </List>
                     )}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -388,6 +414,8 @@ const Mapa = () => {
                 </Alert>
             </Snackbar>
         </div>
+     <Footer />
+    </DashboardLayout>
     );
 };
 

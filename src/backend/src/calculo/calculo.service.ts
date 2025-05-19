@@ -1,21 +1,43 @@
-import { Injectable, HttpException, HttpStatus, Inject } from "@nestjs/common";
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { Calculation } from "./shema/datos.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
-import * as ExcelJS from 'exceljs';
 import { TrazasService } from 'src/trazas/trazas.service';
-import { Response } from 'express';
-import { IReporteGenerador} from "src/report/interface/report.interface";
+import { ReporteExcelService } from "./reporte/ReporteExcel.service";
 import { format } from 'date-fns';
+import { EcuacionesService } from "./ecuaciones/ecuaciones.service";
 
 @Injectable()
 export class CalculoService {
   constructor(
     @InjectModel(Calculation.name) private readonly datosModel: Model<Calculation>,
     private readonly trazasService: TrazasService,
-    @Inject('IReporteGenerador')
-    private readonly reporteGenerador: IReporteGenerador<any>,
+    private readonly ecuacionesService: EcuacionesService,
+    private readonly reporteExcel: ReporteExcelService,
   ) {}
+
+  private calcularQyK(params: {
+    densidad_a: number;
+    densidad_m: number;
+    indice: number;
+    coeficiente: number;
+    altura: number;
+    angulo: number;
+    aceleracion: number;
+    P: number;
+  }) {
+    const Q = this.ecuacionesService.calculationQ(
+      params.densidad_a,
+      params.densidad_m,
+      params.indice,
+      params.coeficiente,
+      params.altura,
+      params.angulo,
+      params.aceleracion
+    );
+    const K = this.ecuacionesService.calculationK(params.P, Q);
+    return { Q, K };
+  }
 
   async createCalculo(
     densidad_a: number,
@@ -25,16 +47,14 @@ export class CalculoService {
     altura: number,
     angulo: number,
     aceleracion: number,
-    Q: number,
     P: number,
-    K: number,
     idUser: string,
-    ubicacion:string,
-    
+    ubicacion: string,
   ): Promise<Calculation> {
-
-    const formattedDate = format(new Date(), 'yyyy-MM-dd'); // Siempre devuelve string
-    console.log(formattedDate); // "2023-12-25" (sin hora)
+    const fecha = format(new Date(), 'yyyy-MM-dd');
+    const { Q, K } = this.calcularQyK({
+      densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,
+    });
 
     try {
       const nuevoDato = new this.datosModel({
@@ -49,9 +69,9 @@ export class CalculoService {
         P,
         K,
         ubicacion,
-        fecha: formattedDate,
+        fecha,
       });
-      
+
       await this.trazasService.createTrazas('Ha realizado un cálculo', idUser);
       return await nuevoDato.save();
     } catch (error) {
@@ -68,13 +88,15 @@ export class CalculoService {
     altura: number,
     angulo: number,
     aceleracion: number,
-    Q: number,
     P: number,
-    K: number,
     idUser: string,
   ): Promise<Calculation> {
+    const { Q, K } = this.calcularQyK({
+      densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,
+    });
+
     try {
-      await this.trazasService.createTrazas('Ha actualizado un Cálculo', idUser);
+      await this.trazasService.createTrazas('Ha actualizado un cálculo', idUser);
       return await this.datosModel.findByIdAndUpdate(
         id,
         {
@@ -104,7 +126,7 @@ export class CalculoService {
       if (!dato) {
         throw new HttpException('Cálculo no encontrado', HttpStatus.NOT_FOUND);
       }
-      
+
       await this.trazasService.createTrazas('Ha eliminado un cálculo', idUser);
       return await this.datosModel.deleteOne({ _id });
     } catch (error) {
@@ -120,41 +142,64 @@ export class CalculoService {
     }
   }
 
+  async exportToExcel() {
+    try {
+      const calculations = await this.datosModel.find().exec();
+      return this.reporteExcel.generar(calculations);
+    } catch (error) {
+      throw new HttpException('Error al exportar los cálculos', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
-  async exportToexcel(){
-    const calculations = await this.datosModel.find().exec();
+  async findAll(filters: {
+  fechaInicio?: string;
+  fechaFin?: string;
+  ubicacion?: string;
+}) {
+  const query: any = {};
 
-    const config = {
-      nombreHoja: 'Cálculos de Sedimentos',
-      columnas: [
-        { header: 'ID', key: '_id', width: 25 },
-        { header: 'Densidad Aire (kg/m³)', key: 'densidad_a', width: 20 },
-        { header: 'Densidad Material (kg/m³)', key: 'densidad_m', width: 20 },
-        { header: 'Índice', key: 'indice', width: 15 },
-        { header: 'Coeficiente', key: 'coeficiente', width: 15 },
-        { header: 'Altura (m)', key: 'altura', width: 15 },
-        { header: 'Ángulo (°)', key: 'angulo', width: 15 },
-        { header: 'Aceleración (m/s²)', key: 'aceleracion', width: 20 },
-        { header: 'Q', key: 'Q', width: 15 },
-        { header: 'P', key: 'P', width: 15 },
-        { header: 'K', key: 'K', width: 15 },
-      ],
-      estiloEncabezado: {
-        bold: true,
-        fillColor: 'FFD3D3D3',
-        alignment: { 
-          vertical: 'middle' as const,  // Usamos 'as const' para asegurar el tipo literal
-          horizontal: 'center' as const // Usamos 'as const' para asegurar el tipo literal
-        },
-      },
-    };
-    // Transformar datos si es necesario (ej: _id a string)
-    const data = calculations.map(calc => ({
-      ...calc.toObject(),
-      _id: calc._id.toString(),
-    }));
+  if (filters.fechaInicio || filters.fechaFin) {
+    query.fecha = {};
 
-    const buffer= await this.reporteGenerador.generar(data,config);
-    return { buffer, nombreHoja: config.nombreHoja}
+    if (filters.fechaInicio) {
+      const fechaInicio = new Date(filters.fechaInicio);
+      if (!isNaN(fechaInicio.getTime())) {
+        query.fecha.$gte = fechaInicio;
+      }
+    }
+
+    if (filters.fechaFin) {
+      const fechaFin = new Date(filters.fechaFin);
+      if (!isNaN(fechaFin.getTime())) {
+        // Sumamos un día para incluir la fecha completa
+        fechaFin.setDate(fechaFin.getDate() + 1);
+        query.fecha.$lt = fechaFin;
+      }
+    }
+
+    // Eliminar query.fecha si quedó vacío
+    if (Object.keys(query.fecha).length === 0) {
+      delete query.fecha;
+    }
+  }
+
+  if (filters.ubicacion) {
+    query.ubicacion = { $regex: new RegExp(filters.ubicacion, 'i') };
+  }
+
+  try {
+    return await this.datosModel.find(query).sort({ fecha: -1 }).exec();
+  } catch (error) {
+    throw new HttpException('Error al filtrar los cálculos', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+
+
+  async getLocations() {
+    try {
+      return await this.datosModel.distinct('ubicacion').exec();
+    } catch (error) {
+      throw new HttpException('Error al obtener ubicaciones', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

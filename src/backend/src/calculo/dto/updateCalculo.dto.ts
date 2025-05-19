@@ -31,16 +31,9 @@ export class UpdateCalculoDto{
 
     @IsNumber()
     @IsNotEmpty()
-    Q:number
-
-
-    @IsNumber()
-    @IsNotEmpty()
     P:number
     
-    @IsNumber()
-    @IsNotEmpty()
-    K:number
+   
 
     
 }

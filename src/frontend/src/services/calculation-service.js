@@ -6,6 +6,15 @@ class  CalculationService {
         return await HttpService.get(url);
     };
 
+    getFiltrosCalculation=async(params)=>{
+        const url= "getfiltrosCalculation";
+        return await HttpService.get(url,params);
+    }
+    getLocations=async()=>{
+        const url="getLocations";
+        return await HttpService.get(url);
+    }
+
     deleteCalculation=async(id)=>{
         const url="deleteCalculation";
         return await HttpService.delete(`${url}/${id}`)

@@ -9,6 +9,7 @@ import { UbicacionModule } from './ubicacion/ubicacion.module';
 import * as dotenv from 'dotenv';
 import { SeedService } from './shared/database/admin.seeder';
 import { ReportesModule } from './report/report.module';
+import { ConfigurationModule } from './configuration/configuration.module';
 dotenv.config();
 @Module({
   imports: [
@@ -19,6 +20,7 @@ dotenv.config();
    TrazasModule,
    UbicacionModule,
    ReportesModule,
+   ConfigurationModule,
    MongooseModule.forRoot(process.env.MONGO_URI),
   ],
   providers: [SeedService],
