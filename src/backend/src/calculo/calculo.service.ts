@@ -151,16 +151,25 @@ export class CalculoService {
     }
   }
 
-  async findAll(filters: {
+ async findAll(filters: {
   fechaInicio?: string;
   fechaFin?: string;
   ubicacion?: string;
 }) {
+  console.log("Filtros recibidos en el servicio:", filters);
+  
   const query: any = {};
 
+  // Filtro por ubicación (corregido)
+  if (filters.ubicacion && filters.ubicacion.trim() !== '') {
+    query.ubicacion = filters.ubicacion.trim();
+    console.log("Query después de agregar ubicación:", query);
+  }
+
+  // Filtros de fecha (mantén tu lógica actual pero añade logs)
   if (filters.fechaInicio || filters.fechaFin) {
     query.fecha = {};
-
+    
     if (filters.fechaInicio) {
       const fechaInicio = new Date(filters.fechaInicio);
       if (!isNaN(fechaInicio.getTime())) {
@@ -171,28 +180,20 @@ export class CalculoService {
     if (filters.fechaFin) {
       const fechaFin = new Date(filters.fechaFin);
       if (!isNaN(fechaFin.getTime())) {
-        // Sumamos un día para incluir la fecha completa
         fechaFin.setDate(fechaFin.getDate() + 1);
         query.fecha.$lt = fechaFin;
       }
     }
 
-    // Eliminar query.fecha si quedó vacío
     if (Object.keys(query.fecha).length === 0) {
       delete query.fecha;
     }
   }
 
-  if (filters.ubicacion) {
-    query.ubicacion = { $regex: new RegExp(filters.ubicacion, 'i') };
-  }
-
-  try {
-    return await this.datosModel.find(query).sort({ fecha: -1 }).exec();
-  } catch (error) {
-    throw new HttpException('Error al filtrar los cálculos', HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+  console.log("Query final que se ejecutará:", query);
+  return this.datosModel.find(query).exec();
 }
+
 
 
   async getLocations() {

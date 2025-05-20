@@ -14,7 +14,13 @@ export class HttpService {
     this._axios.interceptors.response.use(onFulfilled, onRejected);
   };
 
-  get = async (url) => await this.request(this.getOptionsConfig("get", url));
+ get = async (url, params = {}) => {
+    const config = {
+      ...this.getOptionsConfig("get", url),
+      params: params // Añade los parámetros como query params
+    };
+    return await this.request(config);
+  };
 
   post = async (url, data) => await this.request(this.getOptionsConfig("post", url, data));
 

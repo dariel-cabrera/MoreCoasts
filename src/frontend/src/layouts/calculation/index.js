@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@mui/material';
+// Calculation.jsx
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, Snackbar, Alert } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import MDBox from 'components/MDBox';
 import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
@@ -17,36 +18,39 @@ import AdvancedSearchFilters from './AdvancedSearchFilters';
 import PDFExporter from './PDFExporter';
 import dayjs from 'dayjs';
 
+// Estado inicial reutilizable para un cálculo nuevo o limpieza de formulario
+const CALCULO_INICIAL = {
+  densidad_a: 0,
+  densidad_m: 0,
+  coeficiente: 0,
+  indice: 0,
+  altura: 0,
+  angulo: 0,
+  aceleracion: 0,
+  P: 0,
+  id: 0,
+  ubicacion: '',
+};
+
 function Calculation() {
-  // Estados
-  const [calculo, setCalculo] = useState({
-    densidad_a: 0,
-    densidad_m: 0,
-    coeficiente: 0,
-    indice: 0,
-    altura: 0,
-    angulo: 0,
-    aceleracion: 0,
-    P: 0,
-    ubicacion: "",
-  });
+  // Estados del componente
+  const [calculo, setCalculo] = useState(CALCULO_INICIAL);
   const [editar, setEditar] = useState(false);
   const [mstNvoCalc, setMstNvoCalc] = useState(false);
   const [calculos, setCalculos] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filtros, setFiltros] = useState({
-    fechaInicio: null,
-    fechaFin: null,
-    ubicacion: ''
-  });
+  const [filtros, setFiltros] = useState({ fechaInicio: null, fechaFin: null, ubicacion: '' });
 
-  // Efectos
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
+  // Estados para mensajes de error o éxito
+  const [mensaje, setMensaje] = useState({ open: false, text: '', severity: 'info' });
 
-  // Métodos
+  // Mostrar snackbar con mensaje
+  const mostrarMensaje = (text, severity = 'info') => {
+    setMensaje({ open: true, text, severity });
+  };
+
+  // Cargar datos iniciales
   const fetchInitialData = async () => {
     setLoading(true);
     try {
@@ -54,110 +58,88 @@ function Calculation() {
         CalculationService.getCalculation(),
         CalculationService.getLocations()
       ]);
-      
-      // Verificar y normalizar el formato de las ubicaciones
+
+      if (!Array.isArray(calculations)) throw new Error("Respuesta inválida de cálculos");
       const normalizedLocations = Array.isArray(locations) 
         ? locations.filter(loc => loc && loc.trim() !== '')
         : [];
-      
+
       setCalculos(calculations);
       setUbicaciones(normalizedLocations);
-      console.log("Datos iniciales cargados:", calculations);
-      console.log("Ubicaciones disponibles:", normalizedLocations);
     } catch (error) {
-      console.error("Error fetching initial data:", error);
-      alert("Error al cargar los datos iniciales");
+      console.error("Error al cargar datos:", error);
+      mostrarMensaje("Error al cargar datos iniciales", 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
+
+  // Obtener datos filtrados del backend
   const getFilteredData = async (params = {}) => {
     setLoading(true);
     try {
-      console.log("Solicitando datos con filtros:", params);
       const data = await CalculationService.getFiltrosCalculation(params);
-      
-      if (!Array.isArray(data)) {
-        throw new Error("La respuesta del servidor no es válida");
-      }
-      
-      console.log("Datos filtrados recibidos:", data);
+      if (!Array.isArray(data)) throw new Error("Respuesta inválida del servidor");
       setCalculos(data);
-      
-      if (data.length === 0) {
-        alert("No se encontraron resultados con los filtros aplicados");
-      }
+      if (data.length === 0) mostrarMensaje("No se encontraron resultados", 'warning');
     } catch (error) {
-      console.error("Error al obtener datos filtrados:", error);
-      alert(`Error al filtrar: ${error.message}`);
+      console.error("Error al filtrar datos:", error);
+      mostrarMensaje(`Error al filtrar: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFiltros(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleDateChange = (name, date) => {
-    setFiltros(prev => ({ ...prev, [name]: date }));
-  };
+  // Manejadores de filtros
+  const handleFilterChange = (e) => setFiltros(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleDateChange = (name, date) => setFiltros(prev => ({ ...prev, [name]: date }));
 
   const applyFilters = () => {
-    // Validación de fechas
-    if (filtros.fechaInicio && filtros.fechaFin && dayjs(filtros.fechaInicio).isAfter(dayjs(filtros.fechaFin))) {
-      alert("La fecha de inicio no puede ser mayor a la fecha fin");
+    if (!filtros.fechaInicio && !filtros.fechaFin && !filtros.ubicacion) {
+      mostrarMensaje("Debe aplicar al menos un filtro", 'warning');
       return;
     }
-
-    // Preparar parámetros para el backend
+    if (filtros.fechaInicio && filtros.fechaFin && dayjs(filtros.fechaInicio).isAfter(filtros.fechaFin)) {
+      mostrarMensaje("La fecha de inicio no puede ser mayor que la fecha fin", 'error');
+      return;
+    }
     const params = {
-      ...(filtros.fechaInicio && { 
-        fechaInicio: dayjs(filtros.fechaInicio).format('YYYY-MM-DD') 
-      }),
-      ...(filtros.fechaFin && { 
-        fechaFin: dayjs(filtros.fechaFin).format('YYYY-MM-DD') 
-      }),
+      ...(filtros.fechaInicio && { fechaInicio: dayjs(filtros.fechaInicio).format('YYYY-MM-DD') }),
+      ...(filtros.fechaFin && { fechaFin: dayjs(filtros.fechaFin).format('YYYY-MM-DD') }),
       ...(filtros.ubicacion && { ubicacion: filtros.ubicacion.trim() })
     };
-
-    console.log("Parámetros que se enviarán:", params);
     getFilteredData(params);
   };
 
   const clearFilters = () => {
-    setFiltros({
-      fechaInicio: null,
-      fechaFin: null,
-      ubicacion: ''
-    });
+    setFiltros({ fechaInicio: null, fechaFin: null, ubicacion: '' });
     fetchInitialData();
   };
 
   const handleExportPDF = () => {
-    if (calculos.length === 0) {
-      alert("No hay datos para exportar");
-      return;
-    }
+    if (calculos.length === 0) 
+    return mostrarMensaje("No hay datos para exportar", 'warning');
     PDFExporter.exportCalculations(calculos, filtros);
   };
 
-  // Render
   return (
-    <DashboardLayout sx={{ width: "100%" }}>
+    <DashboardLayout>
       <DashboardNavbar />
 
       <MDBox py={3} textAlign="center">
-        <MDTypography variant="h4" fontWeight="medium" color="black" mt={1}>
+        <MDTypography variant="h4" fontWeight="medium" color="black">
           Gestión de Cálculos
         </MDTypography>
       </MDBox>
 
       {loading ? (
         <MDBox display="flex" justifyContent="center" alignItems="center" height="200px">
-          <MDTypography variant="body1">Cargando datos...</MDTypography>
+          <MDTypography>Cargando datos...</MDTypography>
         </MDBox>
       ) : mstNvoCalc ? (
         <NuevoCalculo
@@ -165,18 +147,7 @@ function Calculation() {
           setCalculo={setCalculo}
           editar={editar}
           limpiarDatos={() => {
-            setCalculo({
-              densidad_a: 0,
-              densidad_m: 0,
-              coeficiente: 0,
-              indice: 0,
-              altura: 0,
-              angulo: 0,
-              aceleracion: 0,
-              P: 0,
-              id: 0,
-              ubicacion: "",
-            });
+            setCalculo(CALCULO_INICIAL);
             setEditar(false);
             setMstNvoCalc(false);
           }}
@@ -185,25 +156,18 @@ function Calculation() {
       ) : (
         <>
           <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <MDButton 
-              variant="gradient" 
-              color="info" 
-              size="medium" 
-              onClick={() => setMstNvoCalc(true)}
-            >
-              Nuevo 
+            <MDButton variant="gradient" color="info" onClick={() => setMstNvoCalc(true)}>
+              Nuevo
             </MDButton>
-            
             <MDBox display="flex" gap={2}>
-              <ExportToExcel 
-                data={calculos} 
-                fileName={`calculos_sedimentos_${dayjs().format('YYYYMMDD')}`} 
+              <ExportToExcel
+                data={calculos}
+                fileName={`calculos_sedimentos_${dayjs().format('YYYYMMDD')}`}
                 disabled={calculos.length === 0}
               />
-              <MDButton 
-                variant="gradient" 
-                color="error" 
-                size="medium" 
+              <MDButton
+                variant="gradient"
+                color="error"
                 onClick={handleExportPDF}
                 disabled={calculos.length === 0}
               >
@@ -223,16 +187,7 @@ function Calculation() {
 
           <MDBox pt={3} pb={3}>
             <Card>
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={3}
-                px={2}
-                variant="gradient"
-                bgColor="info"
-                borderRadius="lg"
-                coloredShadow="info"
-              >
+              <MDBox mx={2} mt={-3} py={3} px={2} bgColor="info" borderRadius="lg" coloredShadow="info">
                 <MDTypography variant="h6" color="white">
                   Resultados de Cálculos ({calculos.length})
                 </MDTypography>
@@ -244,37 +199,17 @@ function Calculation() {
                     onEditar: (val) => {
                       setEditar(true);
                       setMstNvoCalc(true);
-                      setCalculo({
-                        densidad_a: val.densidad_a,
-                        densidad_m: val.densidad_m,
-                        coeficiente: val.coeficiente,
-                        indice: val.indice,
-                        altura: val.altura,
-                        angulo: val.angulo,
-                        aceleracion: val.aceleracion,
-                        P: val.P,
-                        id: val._id,
-                        ubicacion: val.ubicacion
-                      });
+                      setCalculo({ ...val, id: val._id });
                     },
-                    onEliminar: (id) => eliminarDatos({ 
-                      idValue: id, 
-                      getDatos:{fetchInitialData}, 
-                      limpiarDatos: () => {
-                        setCalculo({
-                          densidad_a: 0,
-                          densidad_m: 0,
-                          coeficiente: 0,
-                          indice: 0,
-                          altura: 0,
-                          angulo: 0,
-                          aceleracion: 0,
-                          P: 0,
-                          id: 0,
-                          ubicacion: "",
-                        });
+                    onEliminar: async (id) => {
+                      try {
+                        await eliminarDatos({ idValue: id, getDatos: { fetchInitialData } });
+                        mostrarMensaje("Registro eliminado correctamente", 'success');
+                      } catch (err) {
+                        console.error("Error al eliminar:", err);
+                        mostrarMensaje("Error al eliminar el cálculo", 'error');
                       }
-                    }),
+                    }
                   })}
                   isSorted={false}
                   entriesPerPage={false}
@@ -286,6 +221,17 @@ function Calculation() {
           </MDBox>
         </>
       )}
+
+      <Snackbar
+        open={mensaje.open}
+        autoHideDuration={4000}
+        onClose={() => setMensaje(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setMensaje(prev => ({ ...prev, open: false }))} severity={mensaje.severity}>
+          {mensaje.text}
+        </Alert>
+      </Snackbar>
 
       <Footer />
     </DashboardLayout>
