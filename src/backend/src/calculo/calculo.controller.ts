@@ -26,7 +26,7 @@ export class CalculoController {
       if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
         throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
       }
-       console.log('Controller',ubicacion,fechaFin,fechaInicio);
+  
       return this.calculoService.findAll({
         fechaInicio,
         fechaFin,

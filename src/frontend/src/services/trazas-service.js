@@ -13,6 +13,14 @@ class  TrazasService {
         const url="postTrazas"
         return await HttpService.post(`${url}/${datos}`)
    }
+   getUsers=async()=>{
+     const url="getUsers"
+     return await HttpService.get(url);
+   }
+   getFiltrosTrazas=async(params)=>{
+     const url="getfiltrosTrazas"
+      return await HttpService.get(url,params);
+   }
 }
 
 export default new TrazasService();

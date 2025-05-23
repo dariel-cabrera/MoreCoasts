@@ -1,4 +1,4 @@
-import { Injectable,UseGuards,Req } from "@nestjs/common";
+import { Injectable,UseGuards,Req, HttpException, HttpStatus } from "@nestjs/common";
 import { Trazas } from "./shema/trazas.shema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
@@ -49,6 +49,57 @@ export class TrazasService{
   async deleteTrazas(id: string): Promise<any> {
     return await this.datosModel.deleteOne({ _id: id });
   }
+
+  async getUsers() {
+      try {
+        return await this.datosModel.distinct('user_name').exec();
+      } catch (error) {
+        throw new HttpException('Error al obtener ubicaciones', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+  }
+
+   async findAll(filters: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    users?: string;
+}) {
+  const query: any = {};
+
+  if (filters.fechaInicio || filters.fechaFin) {
+    query.fecha = {};
+
+    if (filters.fechaInicio) {
+      const fechaInicio = new Date(filters.fechaInicio);
+      if (!isNaN(fechaInicio.getTime())) {
+        query.fecha.$gte = fechaInicio;
+      }
+    }
+
+    if (filters.fechaFin) {
+      const fechaFin = new Date(filters.fechaFin);
+      if (!isNaN(fechaFin.getTime())) {
+        // Sumamos un día para incluir la fecha completa
+        fechaFin.setDate(fechaFin.getDate() + 1);
+        query.fecha.$lt = fechaFin;
+      }
+    }
+
+    // Eliminar query.fecha si quedó vacío
+    if (Object.keys(query.fecha).length === 0) {
+      delete query.fecha;
+    }
+  }
+
+  if (filters.users) {
+    query.users = { $regex: new RegExp(filters.users, 'i') };
+  }
+
+  try {
+    return await this.datosModel.find(query).sort({ fecha: -1 }).exec();
+  } catch (error) {
+    throw new HttpException('Error al filtrar las trazas', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
 
   
 

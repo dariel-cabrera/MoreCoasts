@@ -1,6 +1,5 @@
-// Calculation.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, Snackbar, Alert } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Card, Snackbar, Alert, CircularProgress } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import MDBox from 'components/MDBox';
 import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
@@ -40,10 +39,19 @@ function Calculation() {
   const [calculos, setCalculos] = useState([]);
   const [ubicaciones, setUbicaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filtros, setFiltros] = useState({ fechaInicio: null, fechaFin: null, ubicacion: '' });
+  const [error, setError] = useState(null);
+  const [filtros, setFiltros] = useState({ 
+    fechaInicio: null, 
+    fechaFin: null, 
+    ubicacion: '' 
+  });
 
   // Estados para mensajes de error o éxito
-  const [mensaje, setMensaje] = useState({ open: false, text: '', severity: 'info' });
+  const [mensaje, setMensaje] = useState({ 
+    open: false, 
+    text: '', 
+    severity: 'info' 
+  });
 
   // Mostrar snackbar con mensaje
   const mostrarMensaje = (text, severity = 'info') => {
@@ -53,6 +61,7 @@ function Calculation() {
   // Cargar datos iniciales
   const fetchInitialData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [calculations, locations] = await Promise.all([
         CalculationService.getCalculation(),
@@ -60,13 +69,15 @@ function Calculation() {
       ]);
 
       if (!Array.isArray(calculations)) throw new Error("Respuesta inválida de cálculos");
+      
       const normalizedLocations = Array.isArray(locations) 
-        ? locations.filter(loc => loc && loc.trim() !== '')
+        ? locations.filter(loc => loc && String(loc).trim() !== '')
         : [];
 
       setCalculos(calculations);
       setUbicaciones(normalizedLocations);
     } catch (error) {
+      setError(error.message);
       console.error("Error al cargar datos:", error);
       mostrarMensaje("Error al cargar datos iniciales", 'error');
     } finally {
@@ -78,16 +89,17 @@ function Calculation() {
     fetchInitialData();
   }, []);
 
-
   // Obtener datos filtrados del backend
   const getFilteredData = async (params = {}) => {
     setLoading(true);
+    setError(null);
     try {
       const data = await CalculationService.getFiltrosCalculation(params);
       if (!Array.isArray(data)) throw new Error("Respuesta inválida del servidor");
       setCalculos(data);
       if (data.length === 0) mostrarMensaje("No se encontraron resultados", 'warning');
     } catch (error) {
+      setError(error.message);
       console.error("Error al filtrar datos:", error);
       mostrarMensaje(`Error al filtrar: ${error.message}`, 'error');
     } finally {
@@ -96,8 +108,13 @@ function Calculation() {
   };
 
   // Manejadores de filtros
-  const handleFilterChange = (e) => setFiltros(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  const handleDateChange = (name, date) => setFiltros(prev => ({ ...prev, [name]: date }));
+  const handleFilterChange = (e) => {
+    setFiltros(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleDateChange = (name, date) => {
+    setFiltros(prev => ({ ...prev, [name]: date }));
+  };
 
   const applyFilters = () => {
     if (!filtros.fechaInicio && !filtros.fechaFin && !filtros.ubicacion) {
@@ -108,6 +125,7 @@ function Calculation() {
       mostrarMensaje("La fecha de inicio no puede ser mayor que la fecha fin", 'error');
       return;
     }
+    
     const params = {
       ...(filtros.fechaInicio && { fechaInicio: dayjs(filtros.fechaInicio).format('YYYY-MM-DD') }),
       ...(filtros.fechaFin && { fechaFin: dayjs(filtros.fechaFin).format('YYYY-MM-DD') }),
@@ -122,10 +140,39 @@ function Calculation() {
   };
 
   const handleExportPDF = () => {
-    if (calculos.length === 0) 
-    return mostrarMensaje("No hay datos para exportar", 'warning');
+    if (calculos.length === 0) {
+      return mostrarMensaje("No hay datos para exportar", 'warning');
+    }
     PDFExporter.exportCalculations(calculos, filtros);
   };
+
+  const LoadingIndicator = () => (
+    <MDBox display="flex" justifyContent="center" alignItems="center" height="300px" flexDirection="column">
+      <CircularProgress size={60} thickness={4} color="info" />
+      <MDTypography mt={2} variant="button" color="text">
+        Cargando datos de cálculos...
+      </MDTypography>
+    </MDBox>
+  );
+
+  const ErrorMessage = ({ error, onRetry }) => (
+    <MDBox p={3} textAlign="center" color="error">
+      <MDTypography color="error" variant="h6">
+        Ocurrió un error
+      </MDTypography>
+      <MDTypography color="text" variant="body2">
+        {error}
+      </MDTypography>
+      <MDButton 
+        variant="gradient" 
+        color="info" 
+        onClick={onRetry}
+        sx={{ mt: 2 }}
+      >
+        Reintentar
+      </MDButton>
+    </MDBox>
+  );
 
   return (
     <DashboardLayout>
@@ -137,10 +184,10 @@ function Calculation() {
         </MDTypography>
       </MDBox>
 
-      {loading ? (
-        <MDBox display="flex" justifyContent="center" alignItems="center" height="200px">
-          <MDTypography>Cargando datos...</MDTypography>
-        </MDBox>
+      {error ? (
+        <ErrorMessage error={error} onRetry={fetchInitialData} />
+      ) : loading ? (
+        <LoadingIndicator />
       ) : mstNvoCalc ? (
         <NuevoCalculo
           calculo={calculo}
@@ -157,7 +204,7 @@ function Calculation() {
         <>
           <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <MDButton variant="gradient" color="info" onClick={() => setMstNvoCalc(true)}>
-              Nuevo
+              Nuevo 
             </MDButton>
             <MDBox display="flex" gap={2}>
               <ExportToExcel
@@ -187,7 +234,15 @@ function Calculation() {
 
           <MDBox pt={3} pb={3}>
             <Card>
-              <MDBox mx={2} mt={-3} py={3} px={2} bgColor="info" borderRadius="lg" coloredShadow="info">
+              <MDBox 
+                mx={2} 
+                mt={-3} 
+                py={3} 
+                px={2} 
+                bgColor="info" 
+                borderRadius="lg" 
+                coloredShadow="info"
+              >
                 <MDTypography variant="h6" color="white">
                   Resultados de Cálculos ({calculos.length})
                 </MDTypography>
@@ -203,7 +258,7 @@ function Calculation() {
                     },
                     onEliminar: async (id) => {
                       try {
-                        await eliminarDatos({ idValue: id, getDatos: { fetchInitialData } });
+                        await eliminarDatos({ idValue: id, getDatos: fetchInitialData });
                         mostrarMensaje("Registro eliminado correctamente", 'success');
                       } catch (err) {
                         console.error("Error al eliminar:", err);
@@ -228,7 +283,11 @@ function Calculation() {
         onClose={() => setMensaje(prev => ({ ...prev, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setMensaje(prev => ({ ...prev, open: false }))} severity={mensaje.severity}>
+        <Alert 
+          onClose={() => setMensaje(prev => ({ ...prev, open: false }))} 
+          severity={mensaje.severity}
+          sx={{ width: '100%' }}
+        >
           {mensaje.text}
         </Alert>
       </Snackbar>
