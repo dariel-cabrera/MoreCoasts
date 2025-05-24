@@ -110,12 +110,18 @@ const Mapa = () => {
         }
     };
 
-    // Mostrar snackbar
-    const showSnackbar = (message, severity = 'success') => {
-        setSnackbarMessage(message);
-        setSnackbarSeverity(severity);
-        setSnackbarOpen(true);
-    };
+    // Mostrar snackbar con manejo de errores
+  const showSnackbar = (message, severity = 'success') => {
+    // Limpiar mensajes de error técnicos
+    const cleanMessage = message
+      .replace('Error: ', '')
+      .replace('AxiosError: ', '')
+      .replace('HttpException: ', '');
+    
+    setSnackbarMessage(cleanMessage);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
     // Guardar un área (crear o actualizar) con validación
     const handleSave = async () => {
@@ -138,7 +144,12 @@ const Mapa = () => {
             fetchAreas();
         } catch (error) {
             console.error('Error saving area:', error);
-            showSnackbar(error.response?.data?.message || 'Error al guardar el área', 'error');
+            showSnackbar(error.message, 'error');
+             // Manejar errores específicos del backend
+            if (error.message.includes('ya está registrado') || 
+                error.message.includes('ya está en uso')) {
+                setErrors(prev => ({ ...prev, nombre: error.message }));
+            }
         } finally {
             setLoading(false);
         }
@@ -162,7 +173,7 @@ const Mapa = () => {
             }
         } catch (error) {
             console.error('Error deleting area:', error);
-            showSnackbar(error.response?.data?.message || 'Error al eliminar el área', 'error');
+            showSnackbar(error.message, 'error');
         } finally {
             setLoading(false);
         }

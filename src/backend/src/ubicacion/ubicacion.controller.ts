@@ -11,8 +11,13 @@ export class UbicacionController {
       ) {}
 
     @Get('getUbicaciones')
-          async getAllTrazas(){
+          async getAllUbicaciones(){
             return this.ubicacionService.getUbicaciones();
+    }
+
+    @Get('getCiudades')
+    async getCiudades() {
+      return this.ubicacionService.getCiudades();
     }
 
    @UseGuards(JwtAuthGuard) // Asegura que el token sea válido

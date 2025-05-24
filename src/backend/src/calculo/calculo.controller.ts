@@ -34,6 +34,60 @@ export class CalculoController {
       });
     }
 
+     @Get('getfiltrosQ')
+    async getfiltosQ(
+      @Query('fechaInicio') fechaInicio: string,
+      @Query('fechaFin') fechaFin: string,
+      @Query('ubicacion') ubicacion?: string
+    ) {
+      // Validación de fechas
+      if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
+        throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
+      }
+  
+      return this.calculoService.getQByDateRange({
+        fechaInicio,
+        fechaFin,
+        ubicacion
+      });
+    }
+
+     @Get('getfiltrosP')
+    async getfiltosP(
+      @Query('fechaInicio') fechaInicio: string,
+      @Query('fechaFin') fechaFin: string,
+      @Query('ubicacion') ubicacion?: string
+    ) {
+      // Validación de fechas
+      if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
+        throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
+      }
+  
+      return this.calculoService.getPByDateRange({
+        fechaInicio,
+        fechaFin,
+        ubicacion
+      });
+    }
+
+     @Get('getfiltrosK')
+    async getfiltosK(
+      @Query('fechaInicio') fechaInicio: string,
+      @Query('fechaFin') fechaFin: string,
+      @Query('ubicacion') ubicacion?: string
+    ) {
+      // Validación de fechas
+      if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
+        throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
+      }
+  
+      return this.calculoService.getKByDateRange({
+        fechaInicio,
+        fechaFin,
+        ubicacion
+      });
+    }
+
 
     @Get('getLocations')
     async getLocations() {

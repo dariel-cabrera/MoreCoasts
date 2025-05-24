@@ -34,6 +34,18 @@ class  CalculationService {
         const url="exportToExcel"
         return await HttpService.get(url)
     }
+    getFiltrosQ=async(params)=>{
+        const url="getFiltrosQ"
+        return await HttpService.get(url,params)
+    }
+    getFiltrosP=async(params)=>{
+        const url="getFiltrosP"
+        return await HttpService.get(url,params)
+    }
+    getFiltrosK=async(params)=>{
+        const url="getFiltrosK"
+        return await HttpService.get(url,params)
+    }
 }
 
 export default new CalculationService();

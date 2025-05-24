@@ -15,6 +15,7 @@ import TrazasService from "services/trazas-service";
 import DataTrazas from "./DataTrazas";
 import { TablaTrazas } from "./table";
 import AdvancedSearchFilters from "./AdavancedSeachFilters";
+import PDFExporter from "./PDFExporer";
 import dayjs from "dayjs";
 
 function Trazas() {
@@ -143,6 +144,22 @@ function Trazas() {
     fetchInitialData();
   };
 
+  const handleExportPDF = () => {
+      if (trazas.length === 0) {
+        mostrarMensaje("No hay datos para exportar", 'warning');
+        return;
+      }
+      PDFExporter.exportTrazas(trazas, filtros);
+    };
+  
+    const handlePrint = () => {
+      if (trazas.length === 0) {
+        mostrarMensaje("No hay datos para imprimir", 'warning');
+        return;
+      }
+      PDFExporter.exportTrazas(trazas, filtros, 'print');
+    };
+
   const tablaTrazas = TablaTrazas({
     datos: trazas,
     onEliminar: (id) => DataTrazas.eliminar({ idValue: id, getTrazas: fetchInitialData }),
@@ -163,7 +180,29 @@ function Trazas() {
       ) : loading ? (
         <LoadingIndicator />
       ) : (
+        
         <>
+          <MDBox display="flex" justifyContent="flex-end" alignItems="center" mb={2} px={2}>
+                      <MDBox display="flex" gap={2}>
+                        <MDButton
+                          variant="gradient"
+                          color="success"
+                          onClick={handlePrint}
+                          disabled={trazas.length === 0}
+                        >
+                          Imprimir
+                        </MDButton>
+                        
+                        <MDButton
+                          variant="gradient"
+                          color="error"
+                          onClick={handleExportPDF}
+                          disabled={trazas.length === 0}
+                        >
+                          Exportar PDF
+                        </MDButton>
+                      </MDBox>
+                    </MDBox>
           <AdvancedSearchFilters
             filters={filtros}
             users={usuarios}

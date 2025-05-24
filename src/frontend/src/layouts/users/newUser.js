@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -16,31 +16,101 @@ import { actualizarDatos, crearDatos } from "./UserFunction";
 export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
   const [errors, setErrors] = useState({});
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    validateForm();
+  }, [user, confirmPassword]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!user.user_name) newErrors.user_name = "Campo requerido";
-    if (!user.email || !/\S+@\S+\.\S+/.test(user.email)) newErrors.email = "Correo inválido";
-    if (!user.name) newErrors.name = "Campo requerido";
-    if (!user.lastname) newErrors.lastname = "Campo requerido";
-    if (!editar && (!user.password || user.password.length < 6))
-      newErrors.password = "Mínimo 6 caracteres";
-    if (!editar && confirmPassword !== user.password)
-      newErrors.confirmPassword = "Las contraseñas no coinciden";
-    if (!editar && !user.ci) newErrors.ci = "Campo requerido";
-    if (!user.role) newErrors.role = "Selecciona un rol";
+  const validateField = (name, value) => {
+    let error = "";
+    
+    switch (name) {
+      case "user_name":
+        if (!value.trim()) error = "Campo requerido";
+        else if (value.length < 3) error = "Mínimo 3 caracteres";
+        else if (!/^[a-zA-Z0-9_]+$/.test(value)) error = "Solo letras, números y guiones bajos";
+        break;
+      case "email":
+        if (!value.trim()) error = "Campo requerido";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Correo inválido";
+        break;
+      case "name":
+      case "lastname":
+        if (!value.trim()) error = "Campo requerido";
+        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) error = "Solo letras y espacios";
+        break;
+      case "password":
+        if (!editar) {
+          if (!value) error = "Campo requerido";
+          else if (value.length < 6) error = "Mínimo 6 caracteres";
+          else if (!/(?=.*[A-Z])(?=.*[0-9])/.test(value)) error = "Debe contener mayúscula y número";
+        }
+        break;
+      case "ci":
+        if (!editar && !value) {
+          error = "Campo requerido";
+        } else if (value && !/^\d{11}$/.test(value)) {
+          error = "El CI debe tener exactamente 11 dígitos";
+        }
+        break;
+      case "rol":
+        if (!value) error = "Selecciona un rol";
+        break;
+    }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return !error;
+  };
+
+  const validateConfirmPassword = (value) => {
+    let error = "";
+    if (!editar && value !== user.password) {
+      error = "Las contraseñas no coinciden";
+    }
+    return error;
+  };
+
+  const validateForm = () => {
+    const requiredFields = [
+      "user_name",
+      "email",
+      "name",
+      "lastname",
+      "rol",
+      ...(!editar ? ["password", "ci"] : [])
+    ];
+
+    let isValid = true;
+    const newErrors = {};
+
+    requiredFields.forEach(field => {
+      const value = user[field];
+      const fieldValid = validateField(field, value);
+      if (!fieldValid) isValid = false;
+    });
+
+    if (!editar) {
+      const confirmPwdError = validateConfirmPassword(confirmPassword);
+      if (confirmPwdError) {
+        newErrors.confirmPassword = confirmPwdError;
+        isValid = false;
+      }
+    }
+
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    setIsFormValid(isValid);
+    return isValid;
   };
 
   const handleSubmit = (action) => {
-    if (validate()) {
+    if (validateForm()) {
       if (action === "crear") {
         crearDatos({ user, getDatos, limpiarDatos });
       } else {
@@ -58,19 +128,20 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
 
         <Grid container spacing={2}>
           {[
-            { label: "Nombre de Usuario", name: "user_name" },
-            { label: "Correo", name: "email" },
-            { label: "Nombre", name: "name" },
-            { label: "Apellido", name: "lastname" },
+            { label: "Nombre de Usuario", name: "user_name", type: "text" },
+            { label: "Correo", name: "email", type: "email" },
+            { label: "Nombre", name: "name", type: "text" },
+            { label: "Apellido", name: "lastname", type: "text" },
           ].map((item) => (
             <Grid item xs={6} key={item.name}>
               <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
                 <MDInput
-                  type="text"
+                  type={item.type}
                   label={item.label}
                   name={item.name}
                   value={user[item.name] || ""}
                   onChange={handleChange}
+                  onBlur={(e) => validateField(item.name, e.target.value)}
                   error={!!errors[item.name]}
                   helperText={errors[item.name]}
                   fullWidth
@@ -89,6 +160,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                     name="password"
                     value={user.password || ""}
                     onChange={handleChange}
+                    onBlur={(e) => validateField("password", e.target.value)}
                     error={!!errors.password}
                     helperText={errors.password}
                     fullWidth
@@ -104,6 +176,10 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                     name="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={(e) => {
+                      const error = validateConfirmPassword(e.target.value);
+                      setErrors(prev => ({ ...prev, confirmPassword: error }));
+                    }}
                     error={!!errors.confirmPassword}
                     helperText={errors.confirmPassword}
                     fullWidth
@@ -114,13 +190,20 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
               <Grid item xs={6}>
                 <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
                   <MDInput
-                    type="number"
+                    type="text"
                     label="Carnet de Identidad"
                     name="ci"
                     value={user.ci || ""}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, '');
+                      if (numericValue.length <= 11) {
+                        handleChange({ target: { name: "ci", value: numericValue } });
+                      }
+                    }}
+                    onBlur={(e) => validateField("ci", e.target.value)}
                     error={!!errors.ci}
                     helperText={errors.ci}
+                    inputProps={{ maxLength: 11 }}
                     fullWidth
                   />
                 </MDBox>
@@ -128,27 +211,31 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
             </>
           )}
 
-          {/* Rol */}
           <Grid item xs={6}>
             <MDBox mt={4} sx={{ width: "100%", maxWidth: 300 }}>
-              <FormControl fullWidth error={!!errors.role}>
-                <InputLabel>Rol</InputLabel>
+              <FormControl fullWidth error={!!errors.rol}>
+                <InputLabel id="rol-label" shrink={!!user.rol}>Rol</InputLabel>
                 <Select
-                  name="role"
-                  value={user.role || ""}
+                  name="rol"
+                  labelId="rol-label"
+                  value={user.rol || ""}
                   onChange={handleChange}
+                  onBlur={(e) => validateField("rol", e.target.value)}
+                  displayEmpty
                   label="Rol"
                 >
+                  <MenuItem value="" disabled>
+                    <em>Seleccione un rol</em>
+                  </MenuItem>
                   <MenuItem value="admin">Administrador</MenuItem>
                   <MenuItem value="worker">Trabajador</MenuItem>
                 </Select>
-                {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
+                {errors.rol && <FormHelperText>{errors.rol}</FormHelperText>}
               </FormControl>
             </MDBox>
           </Grid>
         </Grid>
 
-        {/* Botones */}
         <MDBox sx={{ mt: 3, width: "100%" }}>
           <Grid container spacing={2} justifyContent="center">
             {editar ? (
@@ -159,6 +246,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                     color="warning"
                     size="medium"
                     onClick={() => handleSubmit("actualizar")}
+                    disabled={!isFormValid}
                   >
                     Actualizar
                   </MDButton>
@@ -177,6 +265,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                     color="info"
                     size="medium"
                     onClick={() => handleSubmit("crear")}
+                    disabled={!isFormValid}
                   >
                     Aceptar
                   </MDButton>
@@ -194,4 +283,3 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
     </MDBox>
   );
 };
-

@@ -7,6 +7,11 @@ class UbicacionService {
          const url="getUbicaciones";
          return await HttpService.get(url);
      };
+
+     getCiudades=async()=>{
+         const url="getCiudades";
+         return await HttpService.get(url);
+     };
  
      deleteUbicacion=async(id)=>{
          const url="deleteUbicacion";

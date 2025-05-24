@@ -202,4 +202,109 @@ export class CalculoService {
       throw new HttpException('Error al obtener ubicaciones', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+  // cálculo.service.ts
+async getQByDateRange(filters: {
+    fechaInicio: string;
+    fechaFin: string;
+    ubicacion?: string;
+  }) {
+    const matchStage: any = {
+      fecha: {
+        $gte: new Date(filters.fechaInicio),
+        $lte: new Date(filters.fechaFin),
+      },
+    };
+
+    if (filters.ubicacion && filters.ubicacion !== 'Todas') {
+      matchStage.ubicacion = filters.ubicacion;
+    }
+
+    try {
+      return await this.datosModel
+        .find({
+          fecha: {
+            $gte: new Date(filters.fechaInicio),
+            $lte: new Date(filters.fechaFin),
+          },
+          ...(filters.ubicacion && filters.ubicacion !== 'Todas' && {
+            ubicacion: filters.ubicacion,
+          }),
+        })
+        .select('fecha ubicacion Q')
+        .sort({ fecha: 1 })
+        .exec();
+    } catch (error) {
+      throw new HttpException('Error al filtrar datos', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getPByDateRange(filters: {
+    fechaInicio: string;
+    fechaFin: string;
+    ubicacion?: string;
+  }) {
+    const matchStage: any = {
+      fecha: {
+        $gte: new Date(filters.fechaInicio),
+        $lte: new Date(filters.fechaFin),
+      },
+    };
+
+    if (filters.ubicacion && filters.ubicacion !== 'Todas') {
+      matchStage.ubicacion = filters.ubicacion;
+    }
+
+    try {
+      return await this.datosModel
+        .find({
+          fecha: {
+            $gte: new Date(filters.fechaInicio),
+            $lte: new Date(filters.fechaFin),
+          },
+          ...(filters.ubicacion && filters.ubicacion !== 'Todas' && {
+            ubicacion: filters.ubicacion,
+          }),
+        })
+        .select('fecha ubicacion P')
+        .sort({ fecha: 1 })
+        .exec();
+    } catch (error) {
+      throw new HttpException('Error al filtrar datos', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getKByDateRange(filters: {
+    fechaInicio: string;
+    fechaFin: string;
+    ubicacion?: string;
+  }) {
+    const matchStage: any = {
+      fecha: {
+        $gte: new Date(filters.fechaInicio),
+        $lte: new Date(filters.fechaFin),
+      },
+    };
+
+    if (filters.ubicacion && filters.ubicacion !== 'Todas') {
+      matchStage.ubicacion = filters.ubicacion;
+    }
+
+    try {
+      return await this.datosModel
+        .find({
+          fecha: {
+            $gte: new Date(filters.fechaInicio),
+            $lte: new Date(filters.fechaFin),
+          },
+          ...(filters.ubicacion && filters.ubicacion !== 'Todas' && {
+            ubicacion: filters.ubicacion,
+          }),
+        })
+        .select('fecha ubicacion K')
+        .sort({ fecha: 1 })
+        .exec();
+    } catch (error) {
+      throw new HttpException('Error al filtrar datos', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

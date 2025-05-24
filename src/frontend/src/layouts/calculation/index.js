@@ -12,12 +12,10 @@ import CalculationService from 'services/calculation-service';
 import { NuevoCalculo } from './NuevoCalculo';
 import { eliminarDatos } from './CalculationFunction';
 import DataTable from 'examples/Tables/DataTable';
-import { ExportToExcel } from 'layouts/buttonExport/ExportToExcel';
 import AdvancedSearchFilters from './AdvancedSearchFilters';
 import PDFExporter from './PDFExporter';
 import dayjs from 'dayjs';
 
-// Estado inicial reutilizable para un cálculo nuevo o limpieza de formulario
 const CALCULO_INICIAL = {
   densidad_a: 0,
   densidad_m: 0,
@@ -32,7 +30,6 @@ const CALCULO_INICIAL = {
 };
 
 function Calculation() {
-  // Estados del componente
   const [calculo, setCalculo] = useState(CALCULO_INICIAL);
   const [editar, setEditar] = useState(false);
   const [mstNvoCalc, setMstNvoCalc] = useState(false);
@@ -46,19 +43,16 @@ function Calculation() {
     ubicacion: '' 
   });
 
-  // Estados para mensajes de error o éxito
   const [mensaje, setMensaje] = useState({ 
     open: false, 
     text: '', 
     severity: 'info' 
   });
 
-  // Mostrar snackbar con mensaje
   const mostrarMensaje = (text, severity = 'info') => {
     setMensaje({ open: true, text, severity });
   };
 
-  // Cargar datos iniciales
   const fetchInitialData = async () => {
     setLoading(true);
     setError(null);
@@ -68,8 +62,6 @@ function Calculation() {
         CalculationService.getLocations()
       ]);
 
-      if (!Array.isArray(calculations)) throw new Error("Respuesta inválida de cálculos");
-      
       const normalizedLocations = Array.isArray(locations) 
         ? locations.filter(loc => loc && String(loc).trim() !== '')
         : [];
@@ -78,7 +70,6 @@ function Calculation() {
       setUbicaciones(normalizedLocations);
     } catch (error) {
       setError(error.message);
-      console.error("Error al cargar datos:", error);
       mostrarMensaje("Error al cargar datos iniciales", 'error');
     } finally {
       setLoading(false);
@@ -89,25 +80,21 @@ function Calculation() {
     fetchInitialData();
   }, []);
 
-  // Obtener datos filtrados del backend
   const getFilteredData = async (params = {}) => {
     setLoading(true);
     setError(null);
     try {
       const data = await CalculationService.getFiltrosCalculation(params);
-      if (!Array.isArray(data)) throw new Error("Respuesta inválida del servidor");
       setCalculos(data);
       if (data.length === 0) mostrarMensaje("No se encontraron resultados", 'warning');
     } catch (error) {
       setError(error.message);
-      console.error("Error al filtrar datos:", error);
       mostrarMensaje(`Error al filtrar: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Manejadores de filtros
   const handleFilterChange = (e) => {
     setFiltros(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -121,6 +108,7 @@ function Calculation() {
       mostrarMensaje("Debe aplicar al menos un filtro", 'warning');
       return;
     }
+    
     if (filtros.fechaInicio && filtros.fechaFin && dayjs(filtros.fechaInicio).isAfter(filtros.fechaFin)) {
       mostrarMensaje("La fecha de inicio no puede ser mayor que la fecha fin", 'error');
       return;
@@ -131,6 +119,7 @@ function Calculation() {
       ...(filtros.fechaFin && { fechaFin: dayjs(filtros.fechaFin).format('YYYY-MM-DD') }),
       ...(filtros.ubicacion && { ubicacion: filtros.ubicacion.trim() })
     };
+    
     getFilteredData(params);
   };
 
@@ -141,9 +130,18 @@ function Calculation() {
 
   const handleExportPDF = () => {
     if (calculos.length === 0) {
-      return mostrarMensaje("No hay datos para exportar", 'warning');
+      mostrarMensaje("No hay datos para exportar", 'warning');
+      return;
     }
     PDFExporter.exportCalculations(calculos, filtros);
+  };
+
+  const handlePrint = () => {
+    if (calculos.length === 0) {
+      mostrarMensaje("No hay datos para imprimir", 'warning');
+      return;
+    }
+    PDFExporter.exportCalculations(calculos, filtros, 'print');
   };
 
   const LoadingIndicator = () => (
@@ -202,16 +200,21 @@ function Calculation() {
         />
       ) : (
         <>
-          <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2} px={2}>
             <MDButton variant="gradient" color="info" onClick={() => setMstNvoCalc(true)}>
               Nuevo 
             </MDButton>
+            
             <MDBox display="flex" gap={2}>
-              <ExportToExcel
-                data={calculos}
-                fileName={`calculos_sedimentos_${dayjs().format('YYYYMMDD')}`}
+              <MDButton
+                variant="gradient"
+                color="success"
+                onClick={handlePrint}
                 disabled={calculos.length === 0}
-              />
+              >
+                Imprimir
+              </MDButton>
+              
               <MDButton
                 variant="gradient"
                 color="error"
@@ -247,6 +250,7 @@ function Calculation() {
                   Resultados de Cálculos ({calculos.length})
                 </MDTypography>
               </MDBox>
+              
               <MDBox pt={3}>
                 <DataTable
                   table={TablaCalculo({
@@ -261,7 +265,6 @@ function Calculation() {
                         await eliminarDatos({ idValue: id, getDatos: fetchInitialData });
                         mostrarMensaje("Registro eliminado correctamente", 'success');
                       } catch (err) {
-                        console.error("Error al eliminar:", err);
                         mostrarMensaje("Error al eliminar el cálculo", 'error');
                       }
                     }
