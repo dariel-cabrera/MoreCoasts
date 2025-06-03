@@ -33,6 +33,7 @@ import CalculationImg from "assets/images/calculation.png";
 import InicioImg from "assets/images/inicio.png";
 import UbicacionImg from "assets/images/ubicacion.png"
 import AjustesImg from "assets/images/ajustes.png"
+import EstadisticaImg from "assets/images/estadistica.png"
  
 
 const ImageIcon = ({ src, alt, fontSize = "small" }) => {
@@ -104,7 +105,7 @@ const routes = [
     type:"collapse",
     name:"Estadistica",
     key:"estadistica",
-    icon:<ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
+    icon:<ImageIcon src={EstadisticaImg} alt="Trazas" fontSize="small" />,
     route:"/estadistica",
     component:<ModuloEstadisticas />,
    },
