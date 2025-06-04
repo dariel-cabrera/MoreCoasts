@@ -2,7 +2,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus, HttpException } from '@ne
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

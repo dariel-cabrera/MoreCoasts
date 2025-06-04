@@ -1,37 +1,30 @@
 import { useContext, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 
-// react-router-dom components
-import { Link } from "react-router-dom";
-
-// @mui material components
 import Card from "@mui/material/Card";
 import Switch from "@mui/material/Switch";
 
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 
-// Authentication layout components
 import BasicLayoutLanding from "layouts/authentication/components/BasicLayoutLanding";
 
-// Images
 import bgImage from "assets/images/playa1.jpg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
 import DataTrazas from "layouts/trazas/DataTrazas";
-
+import jwtDecode from "jwt-decode";
 
 function Login() {
-  const authContext = useContext(AuthContext);
-  const [credentialsErros, setCredentialsError] = useState(null);
+  const { isAuthenticated, loading, login } = useContext(AuthContext);
+
+  const [credentialsError, setCredentialsError] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const [user,setUser]=useState({});
   const [inputs, setInputs] = useState({
-    user_name: "Admin",
+    user: "Admin",       // corregido nombre para que coincida con input name
     password: "secret",
   });
 
@@ -40,7 +33,13 @@ function Login() {
     passwordError: false,
   });
 
-  const addUserHandler = (newUser) => setUser(newUser);
+  // Si está cargando el contexto, no mostrar nada (o spinner)
+  if (loading) return null;
+
+  // Si ya está autenticado, redirigir al dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
@@ -52,55 +51,54 @@ function Login() {
   };
 
   const submitHandler = async (e) => {
-    // check rememeber me?
     e.preventDefault();
 
-    
-
+    // Validaciones simples
+    if (!inputs.user.trim()) {
+      setErrors({ userError: true, passwordError: false });
+      setCredentialsError("El usuario es requerido");
+      return;
+    }
     if (inputs.password.trim().length < 6) {
-      setErrors({ ...errors, passwordError: true });
+      setErrors({ userError: false, passwordError: true });
+      setCredentialsError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
-    const newUser = { user_name: inputs.user, password: inputs.password };
-    addUserHandler(newUser);
+    setCredentialsError(null);
+    setErrors({ userError: false, passwordError: false });
 
+    // Preparar datos para el servicio de autenticación
+    const newUser = { user_name: inputs.user, password: inputs.password };
     const myData = {
       data: {
         type: "token",
         attributes: { ...newUser },
       },
     };
-    console.log(myData);
-    // Hubo Cambios Aki 
 
     try {
       const response = await AuthService.login(myData);
-      authContext.login(response.access_token, response.refresh_token);
-      DataTrazas.crear({accion: 'Se ha autenticado'});
-    } catch (res) {
-      console.error("Error en el login:", res);
-    
-      if (res?.message) {
-        setCredentialsError(res.message);
-      } else if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-        setCredentialsError(res.errors[0].detail || "Error desconocido.");
+
+      // Decodificar token para obtener datos y rol
+      
+ 
+      // Usar login del contexto para actualizar estado y navegar
+      login(response.access_token, response.refresh_token);
+
+      // Registrar acción (opcional)
+      DataTrazas.crear({ accion: "Se ha autenticado" });
+    } catch (error) {
+      console.error("Error en el login:", error);
+
+      if (error?.message) {
+        setCredentialsError(error.message);
+      } else if (error?.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+        setCredentialsError(error.errors[0].detail || "Error desconocido.");
       } else {
         setCredentialsError("Error inesperado. Inténtalo de nuevo.");
       }
     }
-
-    return () => {
-      setInputs({
-        user: "",
-        password: "",
-      });
-
-      setErrors({
-        userError: false,
-        passwordError: false,
-      });
-    };
   };
 
   return (
@@ -120,7 +118,6 @@ function Login() {
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
             Iniciar Sesión
           </MDTypography>
-          
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
           <MDBox component="form" role="form" method="POST" onSubmit={submitHandler}>
@@ -129,10 +126,10 @@ function Login() {
                 type="text"
                 label="Usuario"
                 fullWidth
-                value={inputs.email}
+                value={inputs.user}
                 name="user"
                 onChange={changeHandler}
-                error={errors.emailError}
+                error={errors.userError}
               />
             </MDBox>
             <MDBox mb={2}>
@@ -163,9 +160,9 @@ function Login() {
                 Iniciar
               </MDButton>
             </MDBox>
-            {credentialsErros && (
+            {credentialsError && (
               <MDTypography variant="caption" color="error" fontWeight="light">
-                {credentialsErros}
+                {credentialsError}
               </MDTypography>
             )}
             <MDBox mt={3} mb={1} textAlign="center">

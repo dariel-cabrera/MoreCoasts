@@ -53,13 +53,14 @@ const ImageIcon = ({ src, alt, fontSize = "small" }) => {
 };
 
 const routes = [
-  {
+   {
     type: "auth",
     name: "Login",
     key: "login",
     icon: <Icon fontSize="small">login</Icon>,
     route: "/auth/login",
     component: <Login />,
+    roles: ['admin', 'worker'], // todos
   },
   {
     type: "collapse",
@@ -68,6 +69,7 @@ const routes = [
     icon: <ImageIcon src={InicioImg} alt="Inicio" fontSize="small" />,
     route: "/dashboard",
     component: <Dashboard />,
+    roles: ['admin', 'worker'], // ambos roles pueden acceder
   },
   {
     type: "collapse",
@@ -76,55 +78,43 @@ const routes = [
     icon: <ImageIcon src={UbicacionImg} alt="Ubicación" fontSize="small" />,
     route: "/area",
     component: <Mapa />,
-  },  
-   {
+    roles: ['admin','worker'], // solo admin
+  },
+  {
     type: "collapse",
     name: "Cálculos",
     key: "calculation",
     icon: <ImageIcon src={CalculationImg} alt="Calculos" fontSize="small" />,
     route: "/calculation",
     component: <Calculation />,
-  }, 
-   {
-    type:"collapse",
-    name:"Usuarios",
-    key:"users",
-    icon:<ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
-    route:"/users",
-    component:<Users />,
-   },
-   {
-    type:"collapse",
-    name:"Trazas",
-    key:"trazas",
-    icon:<ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
-    route:"/trazas",
-    component:<Trazas />,
-   },
-   {
-    type:"collapse",
-    name:"Estadistica",
-    key:"estadistica",
-    icon:<ImageIcon src={EstadisticaImg} alt="Trazas" fontSize="small" />,
-    route:"/estadistica",
-    component:<ModuloEstadisticas />,
-   },
-   {
-    type:"collapse",
-    name:"Configuracion",
-    key:"configuracion",
-    icon:<ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
-    route:"/configuracion",
-    component:<Configuracion />,
-   },
- 
+    roles: ['admin', 'worker'], // ambos roles
+  },
   {
     type: "collapse",
-    name: "Notifications",
-    key: "notifications",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "/notifications",
-    component: <Notifications />,
+    name: "Usuarios",
+    key: "users",
+    icon: <ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
+    route: "/users",
+    component: <Users />,
+    roles: ['admin'], // solo admin
+  },
+  {
+    type: "collapse",
+    name: "Estadistica",
+    key: "estadistica",
+    icon: <ImageIcon src={EstadisticaImg} alt="Trazas" fontSize="small" />,
+    route: "/estadistica",
+    component: <ModuloEstadisticas />,
+    roles: ['admin', 'worker'], // ambos roles
+  },
+  {
+    type: "collapse",
+    name: "Configuracion",
+    key: "configuracion",
+    icon: <ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
+    route: "/configuracion",
+    component: <Configuracion />,
+    roles: ['admin'], // solo admin
   },
   {
     type: "collapse",
@@ -133,6 +123,7 @@ const routes = [
     icon: <Icon fontSize="small">person</Icon>,
     route: "/profile",
     component: <Profile />,
+    roles: ['admin', 'worker'], // ambos roles
   },
   {
     type: "collapse",

@@ -1,61 +1,165 @@
 
-import { createContext, useContext, useReducer, useMemo, useState, useEffect } from "react";
+import { createContext, useContext, useReducer, useMemo, useState, useEffect,useCallback } from "react";
 
-// prop-types is a library for typechecking of props
+
 import PropTypes from "prop-types";
 import { useLocation, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 // Material Dashboard 2 React main context
 const MaterialUI = createContext();
 
-// authentication context
 export const AuthContext = createContext({
   isAuthenticated: false,
+  role: null,
+  token: null,
+  user: null,
   login: () => {},
-  register: () => {},
   logout: () => {},
+  loading: true,
+  error: null,
 });
 
 const AuthContextProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    role: null,
+    token: null,
+    user: null,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const token = localStorage.getItem("token");
+  const decodeToken = useCallback((token) => {
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      
+      if (decoded.exp < currentTime) {
+        throw new Error("Token expired");
+      }
 
-  useEffect(() => {
-    if (!token) return;
-
-    setIsAuthenticated(true);
-    navigate(location.pathname);
+      return {
+        role: decoded.role || "worker",
+        user: {
+          id: decoded.sub,
+          username: decoded.username || "",
+          email: decoded.email || "",
+          // Agrega más campos según necesites
+        },
+      };
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      setError(error.message);
+      return null;
+    }
   }, []);
 
+  const checkAuth = useCallback(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setAuthState({
+        isAuthenticated: false,
+        role: null,
+        token: null,
+        user: null,
+      });
+      setLoading(false);
+      return;
+    }
+
+    const decoded = decodeToken(token);
+    if (!decoded) {
+      localStorage.removeItem("token");
+      setLoading(false);
+      return;
+    }
+
+    setAuthState({
+      isAuthenticated: true,
+      role: decoded.role,
+      token,
+      user: decoded.user,
+    });
+    setLoading(false);
+
+    // Redirigir si está en login y ya está autenticado
+    if (location.pathname === "/auth/login") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [decodeToken, location.pathname, navigate]);
+
   useEffect(() => {
-    if (!token) return;
+    checkAuth();
+  }, [checkAuth]);
 
-    setIsAuthenticated(isAuthenticated);
-    navigate(location.pathname);
-  }, [isAuthenticated]);
+  const login = (token, refreshToken) => {
+    try {
+      const decoded = decodeToken(token);
+      if (!decoded) {
+        throw new Error("Invalid token");
+      }
 
-  const login = (token) => {
-    localStorage.setItem("token", token);
-    setIsAuthenticated(true);
-    navigate("/dashboard");
+      localStorage.setItem("token", token);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+
+      setAuthState({
+        isAuthenticated: true,
+        role: decoded.role,
+        token,
+        user: decoded.user,
+      });
+      setError(null);
+      navigate("/dashboard", { replace: true });
+    } catch (error) {
+      setError(error.message);
+      logout();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setIsAuthenticated(false);
+    localStorage.removeItem("refreshToken");
+    setAuthState({
+      isAuthenticated: false,
+      role: null,
+      token: null,
+      user: null,
+    });
+    setError(null);
     navigate("/auth/login");
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: authState.isAuthenticated,
+        role: authState.role,
+        token: authState.token,
+        user: authState.user,
+        login,
+        logout,
+        loading,
+        error,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
+AuthContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default AuthContextProvider;
+
 
 // Setting custom name for the context which is visible on react dev tools
 MaterialUI.displayName = "MaterialUIContext";
