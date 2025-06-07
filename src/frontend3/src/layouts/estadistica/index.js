@@ -9,8 +9,10 @@ import {
   TextField
 } from "@mui/material";
 import MDBox from "components/MDBox";
+import MDTypography from 'components/MDTypography';
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import MDButton from 'components/MDButton';
 import Footer from "examples/Footer";
 import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
@@ -22,6 +24,9 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import es from 'date-fns/locale/es';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PrintIcon from '@mui/icons-material/Print'
+import PieChart from 'examples/Charts/PieChart';
+import ReportesEstadisticos from './reporte';
+import { useRef } from "react";
 
 const ModuloEstadisticas = () => {
   const [fechaInicio, setFechaInicio] = useState(new Date());
@@ -49,6 +54,7 @@ const ModuloEstadisticas = () => {
     cargarUbicaciones();
   }, []);
 
+   const reportRef = useRef();
    // Función para formatear datos de gráficos
   const formatearDatos = (data, parametro) => ({
     labels: data.map(item => new Date(item.fecha).toLocaleDateString()),
@@ -57,6 +63,27 @@ const ModuloEstadisticas = () => {
       data: data.map(item => item[parametro])
     }
   });
+
+  const formatearDatosPieChart = (data, parametro) => {
+  const valores = {};
+
+  data.map(item => {
+    const fecha = new Date(item.fecha).toLocaleDateString();
+    valores[fecha] = (valores[fecha] || 0) + item[parametro];
+  });
+
+  return {
+    labels: Object.keys(valores),
+    datasets: {
+      label: `Distribución de ${parametro}`,
+      data: Object.values(valores),
+      backgroundColor: [
+        "#42A5F5", "#66BB6A", "#FFA726", "#EF5350", "#AB47BC", "#29B6F6", "#FF7043", "#9CCC65"
+      ],
+    }
+  };
+};
+
 
    // Cargar datos según filtros
   useEffect(() => {
@@ -121,6 +148,15 @@ const ModuloEstadisticas = () => {
               chart={param.data}
             />
           )}
+
+          {tipoGrafico === 'pastel' && (
+          <PieChart
+          icon={{ color: param.color, component: "pie_chart" }}
+          title={param.titulo}
+          description="Distribución por fecha"
+          chart={formatearDatosPieChart(param.data, param.clave)}
+          />
+          )}
         </Grid>
       );
     });
@@ -129,38 +165,21 @@ const ModuloEstadisticas = () => {
   };
 
 
-  // Manejar exportación a PDF
-  const handleExportPDF = () => {
-    // Lógica para exportar a PDF
-    console.log("Exportando a PDF...");
-  };
-
-  // Manejar impresión
-  const handleImprimir = () => {
-    // Lógica para imprimir
-    window.print();
-  };
+  
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
         {/* Encabezado con título y botones */}
-        <Grid container spacing={3} alignItems="center" mb={3}>
-          <Grid item xs={6}>
-            <MDBox>
-              <h2>Datos Estadísticos</h2>
-            </MDBox>
-          </Grid>
-          <Grid item xs={6} container justifyContent="flex-end">
-            <IconButton onClick={handleExportPDF} color="primary">
-              <PictureAsPdfIcon />
-            </IconButton>
-            <IconButton onClick={handleImprimir} color="primary">
-              <PrintIcon />
-            </IconButton>
-          </Grid>
-        </Grid>
+        <MDBox py={3} textAlign="center">
+                <MDTypography variant="h4" fontWeight="medium" color="black">
+                  Datos Estadísticos
+                </MDTypography>
+          </MDBox>
+        <MDBox display="flex" justifyContent="flex-end" alignItems="center" mb={2} px={2}>
+            <ReportesEstadisticos targetRef={reportRef} />
+          </MDBox>
 
         {/* Filtros */}
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -208,7 +227,7 @@ const ModuloEstadisticas = () => {
                 >
                   <MenuItem value="barras">Barras</MenuItem>
                   <MenuItem value="lineas">Líneas</MenuItem>
-                  <MenuItem value="pastel">Pastel</MenuItem>
+                  
                 </Select>
               </FormControl>
             </Grid>
@@ -216,11 +235,11 @@ const ModuloEstadisticas = () => {
         </LocalizationProvider>
 
        {/* Gráficos */}
-        <MDBox mt={4}>
+       <MDBox mt={4} ref={reportRef}>
           <Grid container spacing={3}>
-            {renderGraficos()}
+          {renderGraficos()}
           </Grid>
-        </MDBox>
+      </MDBox>
       </MDBox>
       <Footer />
     </DashboardLayout>

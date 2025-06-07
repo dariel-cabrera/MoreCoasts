@@ -20,7 +20,8 @@ export class EcuacionesService {
       }
 
       const alturaPotencia = Math.pow(altura, 5);
-      const seno = Math.sin(2 * angulo);
+      const anguloRadianes = angulo * Math.PI / 180
+      const seno = Math.sin(2 * anguloRadianes);
 
       const Q = (N / D) * Math.sqrt(alturaPotencia) * seno;
       

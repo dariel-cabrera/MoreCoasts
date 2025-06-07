@@ -248,7 +248,7 @@ const Mapa = () => {
 
     return (
          <DashboardLayout sx={{ width: "100%" }}>
-              <DashboardNavbar />
+        <DashboardNavbar />
         <div style={{ height: '100vh', width: '100%' }}>
             <AppBar position="static">
                 <Toolbar>

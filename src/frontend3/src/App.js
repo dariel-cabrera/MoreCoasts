@@ -304,18 +304,9 @@ export default function App() {
               }
               key="user-profile"
             />
-            <Route
-              exact
-              path="user-management"
-              element={
-                <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
-                  <UserManagement />
-                </ProtectedRoute>
-              }
-              key="user-management"
-            />
+            
             {getRoutes(routes)}
-            <Route path="*" element={<Navigate to="/auth/login" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </ThemeProvider>
       )}

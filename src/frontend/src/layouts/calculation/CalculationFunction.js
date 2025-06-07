@@ -67,10 +67,28 @@ export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) =
     cancelButtonText: "No, cancelar!",
     reverseButtons: true
   });
+  const { densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion } = calculo;
 
+  if (!densidad_a || !densidad_m || !indice || !coeficiente || !altura || !angulo || !aceleracion || !P || !ubicacion) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Por favor, complete todos los campos antes de calcular.'
+    });
+    return;
+  }
+  if (densidad_a  < densidad_m ) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'La Densidad del Mar no puede ser mayor a la Densidad del Sedimento.'
+    });
+    return;
+  }
+  const data= {densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,ubicacion,id}
   if (result.isConfirmed) {
     try {
-      await CalculationService.updateCalculation(id, calculo);
+      await CalculationService.updateCalculation( data);
       await getDatos();
       limpiarDatos();
       swalWithBootstrapButtons.fire({

@@ -20,9 +20,9 @@ class  CalculationService {
         return await HttpService.delete(`${url}/${id}`)
     };
     
-    updateCalculation=async(id,datos)=>{
+    updateCalculation=async(datos)=>{
         const url="updateCalculation"
-        return await HttpService.put(`${url}/${id}`,datos)
+        return await HttpService.put(`${url}`,datos)
     };
 
     postCalculation=async(datos)=>{

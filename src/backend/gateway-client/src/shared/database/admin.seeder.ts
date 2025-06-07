@@ -55,9 +55,9 @@ export class SeedService implements OnApplicationBootstrap {
       }
 
       const configuracion = new this.configurationModel({
-        densidad_aMax: 2000,
+        densidad_aMax: 3000,
         densidad_aMin: 1000,
-        densidad_mMin: 1000,
+        densidad_mMin: 900,
         densidad_mMax: 1500,
         indiceMax: 2,
         indiceMin: 0,

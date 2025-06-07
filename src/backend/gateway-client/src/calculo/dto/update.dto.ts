@@ -1,6 +1,10 @@
 import { IsNotEmpty, IsNumber, IsString} from "class-validator"
 
 export class UpdateCalculoDto{
+    @IsString()
+    @IsNotEmpty()
+    id:string
+
     @IsNumber()
     @IsNotEmpty()
     densidad_a:number
@@ -32,4 +36,8 @@ export class UpdateCalculoDto{
     @IsNumber()
     @IsNotEmpty()
     P:number   
+
+    @IsString()
+    @IsNotEmpty()
+    ubicacion:string
 }

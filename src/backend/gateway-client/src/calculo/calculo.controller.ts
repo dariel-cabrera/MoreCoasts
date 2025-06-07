@@ -58,9 +58,10 @@ export class CalculoController {
     return this.calculationCliente.send('create_calculo', data);
   }
 
-  @Put('updateCalculation/:id')
-  update(@Param('id') id: string, @Body() data: UpdateCalculoDto) {
-    return this.calculationCliente.send('update_calculo', { id, ...data });
+  @Put('updateCalculation')
+  update( @Body() data: UpdateCalculoDto) {
+    console.log(data)
+    return this.calculationCliente.send('update_calculo',  data );
   }
 
   @Delete('deleteCalculation/:id')

@@ -5,7 +5,7 @@ import MDButton from 'components/MDButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export const TablaUser= ({ users, onEditar, onEliminar }) => {
+export const TablaUser = ({ users, onEditar, onEliminar }) => {
   const columns = [
     { Header: "#", accessor: "index", align: "left" },
     { Header: "Usuario", accessor: "usuario", align: "left" },
@@ -19,20 +19,35 @@ export const TablaUser= ({ users, onEditar, onEliminar }) => {
 
   const rows = Array.isArray(users) ? users.map((val, index) => ({
     index: index + 1,
-    usuario:val.user_name,
+    usuario: val.user_name,
     fecha: val.fecha || "Sin fecha",
-    nombre:val.name,
-    apellido:val.lastname,
-    ci:val.ci,
-    correo:val.email,
+    nombre: val.name,
+    apellido: val.lastname,
+    ci: val.ci,
+    correo: val.email,
 
     acciones: (
       <MDBox display="flex" justifyContent="space-around">
-        <MDButton variant="gradient" color="info" size="small" onClick={() => onEditar(val)}>
+        <MDButton 
+          variant="gradient" 
+          color="info" 
+          size="small" 
+          onClick={() => onEditar(val)}
+        >
           <EditIcon />
         </MDButton>
-        <MDButton variant="gradient" color="error" size="small" onClick={() => onEliminar(val._id)}>
-         <DeleteIcon />
+        <MDButton 
+          variant="gradient" 
+          color="error" 
+          size="small" 
+          onClick={() => onEliminar(val._id)}
+          disabled={val.user_name === "Admin"}
+          sx={{
+            opacity: val.user_name === "Admin" ? 0.5 : 1,
+            cursor: val.user_name === "Admin" ? "not-allowed" : "pointer"
+          }}
+        >
+          <DeleteIcon />
         </MDButton>
       </MDBox>
     )

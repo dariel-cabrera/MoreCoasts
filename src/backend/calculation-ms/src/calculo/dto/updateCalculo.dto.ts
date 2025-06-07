@@ -38,6 +38,9 @@ export class UpdateCalculoDto{
     @IsNotEmpty()
     P:number
     
+    @IsString()
+    @IsNotEmpty()
+    ubicacion:string
    
 
     

@@ -18,15 +18,23 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
 
+  const isAdmin = editar && user.rol === "admin"; // <-- clave
+
   useEffect(() => {
     validateForm();
   }, [user, confirmPassword]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setUser((prev) => ({ ...prev, [name]: value }));
-    validateField(name, value);
-  };
+  const { name, value } = e.target;
+
+  // Prevenir cambios si el campo es user_name o rol y el usuario es admin
+  if (isAdmin && (name === "user_name" || name === "rol")) {
+    return; // No hace nada si se intenta editar estos campos
+  }
+
+  setUser((prev) => ({ ...prev, [name]: value }));
+  validateField(name, value);
+};
 
   const validateField = (name, value) => {
     let error = "";
@@ -128,7 +136,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
 
         <Grid container spacing={2}>
           {[
-            { label: "Nombre de Usuario", name: "user_name", type: "text" },
+            { label: "Nombre de Usuario", name: "user_name", type: "text", disabled: isAdmin },
             { label: "Correo", name: "email", type: "email" },
             { label: "Nombre", name: "name", type: "text" },
             { label: "Apellido", name: "lastname", type: "text" },
@@ -145,9 +153,10 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                   error={!!errors[item.name]}
                   helperText={errors[item.name]}
                   fullWidth
+                  disabled={item.disabled || false}
                 />
               </MDBox>
-            </Grid>
+              </Grid>
           ))}
 
           {!editar && (
@@ -211,7 +220,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
             </>
           )}
 
-          <Grid item xs={6}>
+           <Grid item xs={6}>
             <MDBox mt={4} sx={{ width: "100%", maxWidth: 300 }}>
               <FormControl fullWidth error={!!errors.rol}>
                 <InputLabel id="rol-label" shrink={!!user.rol}>Rol</InputLabel>
@@ -223,6 +232,7 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
                   onBlur={(e) => validateField("rol", e.target.value)}
                   displayEmpty
                   label="Rol"
+                  disabled={isAdmin} // <-- clave
                 >
                   <MenuItem value="" disabled>
                     <em>Seleccione un rol</em>
