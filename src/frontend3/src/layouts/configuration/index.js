@@ -194,10 +194,11 @@ export const Configuracion = () => {
       <DashboardNavbar />
     <MDBox sx={{ pl: 2 }}>
       <Grid container direction="column">
-        <MDTypography variant="h5" fontWeight="medium" color="black" mt={1} mb={2}>
-          Configuración de Límites
-        </MDTypography>
-
+      <MDBox py={3} textAlign="center">
+          <MDTypography variant="h4" fontWeight="medium" color="black">
+                  Configuración de Límites
+            </MDTypography>
+        </MDBox>
         <Grid container spacing={2}>
           {configPairs.map(({ labelMin, nameMin, labelMax, nameMax }) => (
             <React.Fragment key={`${nameMin}-${nameMax}`}>

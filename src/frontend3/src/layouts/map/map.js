@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Polygon, Popup } from 'react-leaflet';
 import { TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, Checkbox, Typography, AppBar, Toolbar, Snackbar, Alert } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
+import MDBox from 'components/MDBox';
+import MDTypography from 'components/MDTypography';
 import { FeatureGroup } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import * as yup from 'yup';
@@ -252,14 +254,17 @@ const Mapa = () => {
         <div style={{ height: '100vh', width: '100%' }}>
             <AppBar position="static">
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Gestión de Áreas Geográficas
+                <MDBox py={3} sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+                    <MDTypography variant="h4" fontWeight="medium" color="black">
+                    Gestión de Áreas Geográficas
+                    </MDTypography>
+                </MDBox>
+
+                {loading && (
+                    <Typography variant="body2" sx={{ mr: 2 }}>
+                    Cargando...
                     </Typography>
-                    {loading && (
-                        <Typography variant="body2" sx={{ mr: 2 }}>
-                            Cargando...
-                        </Typography>
-                    )}
+                )}
                 </Toolbar>
             </AppBar>
             <div style={{ display: 'flex', height: 'calc(100vh - 64px)' }}>

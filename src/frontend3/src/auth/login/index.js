@@ -76,7 +76,8 @@ function Login() {
 
     try {
       const response = await AuthService.login(myData);
-      authContext.login(response.access_token, response.refresh_token);
+      console.log(response.role)
+      authContext.login(response.access_token, response.refresh_token,response.role);
       DataTrazas.crear({accion: 'Se ha autenticado'});
     } catch (res) {
       console.error("Error en el login:", res);

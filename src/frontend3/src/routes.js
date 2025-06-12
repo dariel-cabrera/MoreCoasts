@@ -6,16 +6,10 @@ import { Configuracion } from "layouts/configuration";
 import Users from "layouts/users";
 import Trazas from "layouts/trazas";
 import ModuloEstadisticas from "layouts/estadistica";
-import Tables from "layouts/tables";
-import Billing from "layouts/billing";
-import RTL from "layouts/rtl";
-import Notifications from "layouts/notifications";
-import Profile from "layouts/profile";
-import SignIn from "layouts/authentication/sign-in";
-import SignUp from "layouts/authentication/sign-up";
+
 
 import UserProfile from "layouts/user-profile";
-import UserManagement from "layouts/user-management";
+
 
 import Login from "auth/login";
 import Register from "auth/register";
@@ -53,14 +47,45 @@ const ImageIcon = ({ src, alt, fontSize = "small" }) => {
 };
 
 const routes = [
+  // Rutas públicas (no requieren autenticación)
   {
-    type: "auth",
+    type: "collapse",
     name: "Login",
     key: "login",
-    icon: <Icon fontSize="small">login</Icon>,
     route: "/auth/login",
     component: <Login />,
+    adminOnly: false,
+    showInMenu: false
   },
+  {
+    type: "collapse",
+    name: "Register",
+    key: "register",
+    route: "/auth/register",
+    component: <Register />,
+    adminOnly: false,
+    showInMenu: false
+  },
+  {
+    type: "collapse",
+    name: "Forgot Password",
+    key: "forgot-password",
+    route: "/auth/forgot-password",
+    component: <ForgotPassword />,
+    adminOnly: false,
+    showInMenu: false
+  },
+  {
+    type: "auth",
+    name: "Reset Password",
+    key: "reset-password",
+    route: "/auth/reset-password",
+    component: <ResetPassword />,
+    adminOnly: false,
+    
+  },
+
+  // Rutas protegidas
   {
     type: "collapse",
     name: "Inicio",
@@ -68,6 +93,8 @@ const routes = [
     icon: <ImageIcon src={InicioImg} alt="Inicio" fontSize="small" />,
     route: "/dashboard",
     component: <Dashboard />,
+    adminOnly: false, // Accesible para todos los roles
+    showInMenu: true
   },
   {
     type: "collapse",
@@ -76,81 +103,80 @@ const routes = [
     icon: <ImageIcon src={UbicacionImg} alt="Ubicación" fontSize="small" />,
     route: "/area",
     component: <Mapa />,
+    adminOnly: false, // Accesible para todos
+    showInMenu: true
   },  
-   {
+  {
     type: "collapse",
     name: "Cálculos",
     key: "calculation",
     icon: <ImageIcon src={CalculationImg} alt="Calculos" fontSize="small" />,
     route: "/calculation",
     component: <Calculation />,
+    adminOnly: false, // Accesible para todos
+    showInMenu: true
   }, 
-   {
-    type:"collapse",
-    name:"Usuarios",
-    key:"users",
-    icon:<ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
-    route:"/users",
-    component:<Users />,
-   },
-   {
-    type:"collapse",
-    name:"Trazas",
-    key:"trazas",
-    icon:<ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
-    route:"/trazas",
-    component:<Trazas />,
-   },
-   {
-    type:"collapse",
-    name:"Estadistica",
-    key:"estadistica",
-    icon:<ImageIcon src={EstadisticaImg} alt="Trazas" fontSize="small" />,
-    route:"/estadistica",
-    component:<ModuloEstadisticas />,
-   },
-   {
-    type:"collapse",
-    name:"Configuracion",
-    key:"configuracion",
-    icon:<ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
-    route:"/configuracion",
-    component:<Configuracion />,
-   },
-
+  {
+    type: "collapse",
+    name: "Usuarios",
+    key: "users",
+    icon: <ImageIcon src={UserImg} alt="Usuarios" fontSize="small" />,
+    route: "/users",
+    component: <Users />,
+    adminOnly: true, // SOLO ADMINISTRADORES
+    showInMenu: true
+  },
+  {
+    type: "collapse",
+    name: "Trazas",
+    key: "trazas",
+    icon: <ImageIcon src={TrazasImg} alt="Trazas" fontSize="small" />,
+    route: "/trazas",
+    component: <Trazas />,
+    adminOnly: true, // SOLO ADMINISTRADORES
+    showInMenu: true
+  },
+  {
+    type: "collapse",
+    name: "Estadistica",
+    key: "estadistica",
+    icon: <ImageIcon src={EstadisticaImg} alt="Trazas" fontSize="small" />,
+    route: "/estadistica",
+    component: <ModuloEstadisticas />,
+    adminOnly: false, // Accesible para todos
+    showInMenu: true
+  },
+  {
+    type: "collapse",
+    name: "Configuracion",
+    key: "configuracion",
+    icon: <ImageIcon src={AjustesImg} alt="Trazas" fontSize="small" />,
+    route: "/configuracion",
+    component: <Configuracion />,
+    adminOnly: true, // SOLO ADMINISTRADORES
+    showInMenu: true
+  },
+  {
+    type: "collapse",
+    name: "Perfil",
+    key: "profile",
+    icon: <Icon fontSize="small">person</Icon>,
+    route: "/user-profile",
+    component: <UserProfile />,
+    adminOnly: false, // Accesible para todos
+    showInMenu: false // Normalmente el perfil se accede desde un menú desplegable
+  },
   {
     type: "collapse",
     name: "Salir",
     key: "salir",
-    icon: <Icon fontSize="small">login</Icon>,
+    icon: <Icon fontSize="small">logout</Icon>,
     route: "/auth/login",
     component: <Login />,
-  },
-  
-  {
-    type: "auth",
-    name: "Register",
-    key: "register",
-    icon: <Icon fontSize="small">reigster</Icon>,
-    route: "/auth/register",
-    component: <Register />,
-  },
-  {
-    type: "auth",
-    name: "Forgot Password",
-    key: "forgot-password",
-    icon: <Icon fontSize="small">assignment</Icon>,
-    route: "/auth/forgot-password",
-    component: <ForgotPassword />,
-  },
-  {
-    type: "auth",
-    name: "Reset Password",
-    key: "reset-password",
-    icon: <Icon fontSize="small">assignment</Icon>,
-    route: "/auth/reset-password",
-    component: <ResetPassword />,
-  },
+    adminOnly: false,
+    showInMenu: true,
+    isLogout: true // Propiedad especial para identificar acción de logout
+  }
 ];
 
 export default routes;

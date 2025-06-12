@@ -24,7 +24,8 @@ import MDBox from "components/MDBox";
 // barra lateral y el configurador de la aplicación.
 import Sidenav from "examples/Sidenav";
 import Configurator from "examples/Configurator";
-
+import AdminRoute from "examples/ProtectedRoute/adminRouter";
+import AccessDenied from "examples/ProtectedRoute/AccessDenied";
 // Material Dashboard 2 React themes
 // Se importan temas personalizados para la aplicación, tanto en modo claro como oscuro, y en formato LTR 
 // (izquierda a derecha) y RTL (derecha a izquierda).
@@ -78,61 +79,52 @@ import UserManagement from "layouts/user-management";
 import { Helmet } from "react-helmet";
 
 export default function App() {
-  // Utiliza el hook useContext para acceder al contexto de autenticación (AuthContext). Este contexto probablemente 
-  // contiene información sobre el estado de autenticación del usuario (por ejemplo, si está logueado o no
   const authContext = useContext(AuthContext);
-
-  // Utiliza un hook personalizado (useMaterialUIController) para obtener el estado (controller) y la función de 
-  // despacho (dispatch) de un contexto relacionado con Material UI. Esto permite manejar el estado de la interfaz de usuario (UI).
   const [controller, dispatch] = useMaterialUIController();
-
-  // Extrae propiedades específicas del objeto controller, como el estado del menú lateral
-  //  (miniSidenav), la dirección del texto (direction), el diseño (layout), etc.
   const {
     miniSidenav,
     direction,
     layout,
-    openConfigurator,
     sidenavColor,
     transparentSidenav,
     whiteSidenav,
     darkMode,
   } = controller;
 
-  // Define varios estados locales:
-  //onMouseEnter: Controla si el mouse está sobre el menú lateral.
-  // rtlCache: Almacena la caché para estilos RTL (derecha a izquierda).
-  //pathname: Obtiene la ruta actual de la URL usando el hook useLocation de react-router-dom.
-  // isDemo: Indica si la aplicación está en modo de demostración.
   const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [rtlCache, setRtlCache] = useState(null);
   const { pathname } = useLocation();
-  
-  
   const [isDemo, setIsDemo] = useState(false);
+  const navigate = useNavigate();
 
-  // Usa useEffect para verificar si la aplicación está en modo de demostración. 
-  // Esto se hace comparando la variable de entorno REACT_APP_IS_DEMO con el valor "true".
+  // Obtener rol del contexto
+  const { role } = authContext;
+  console.log(role)
+
   useEffect(() => {
     setIsDemo(process.env.REACT_APP_IS_DEMO === "false");
   }, []);
 
-  // Cache for the rtl
-  // Usa useMemo para crear una caché de estilos RTL 
-  // (derecha a izquierda) y almacenarla en el estado rtlCache. Esto solo se ejecuta una vez al montar el componente.
   useMemo(() => {
     const cacheRtl = createCache({
       key: "rtl",
       stylisPlugins: [rtlPlugin],
     });
-
     setRtlCache(cacheRtl);
   }, []);
 
-  // Open sidenav when mouse enter on mini sidenav
-  //     Define funciones para manejar eventos de mouse
-  // handleOnMouseEnter: Expande el menú lateral cuando el mouse entra en él.
-  //handleOnMouseLeave: Colapsa el menú lateral cuando el mouse sale de él.
+  // Filtrar rutas para el menú lateral
+const menuRoutes = useMemo(() => {
+  return routes.filter(route => {
+    if (!route.showInMenu) return false; // 👈 Filtro clave que te falta
+    if (route.type === "auth") return false;
+    if (route.adminOnly && role !== "admin") return false;
+    return true;
+  });
+}, [routes, role]);
+
+console.log(menuRoutes)
+
   const handleOnMouseEnter = () => {
     if (miniSidenav && !onMouseEnter) {
       setMiniSidenav(dispatch, false);
@@ -140,7 +132,6 @@ export default function App() {
     }
   };
 
-  // Close sidenav when mouse leave mini sidenav
   const handleOnMouseLeave = () => {
     if (onMouseEnter) {
       setMiniSidenav(dispatch, true);
@@ -148,91 +139,61 @@ export default function App() {
     }
   };
 
-  // Change the openConfigurator state
-  // Alterna el estado del configurador (openConfigurator) entre abierto y cerrado.
-  const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
 
-  // if the token expired or other errors it logs out and goes to the login page
-  // Configura interceptores de Axios para manejar errores (por ejemplo, token expirado). Si ocurre un error, 
-  // cierra la sesión del usuario y lo redirige a la página de inicio de sesión.
-  const navigate = useNavigate();
   setupAxiosInterceptors(() => {
     authContext.logout();
     navigate("/auth/login");
   });
 
-  // Setting the dir attribute for the body element
-  // Cambia la dirección del texto del cuerpo del documento (dir) según el estado direction (LTR o RTL).
   useEffect(() => {
     document.body.setAttribute("dir", direction);
   }, [direction]);
 
-  // Setting page scroll to 0 when changing the route
-  // Restablece la posición del scroll a la parte superior de la página cada vez que cambia la ruta (pathname).
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
   }, [pathname]);
 
-  // Recorre un array de rutas (allRoutes) y genera componentes Route para cada una. 
-  // Si la ruta está protegida (type !== "auth"), 
-  // la envuelve en un componente ProtectedRoute que verifica la autenticación del usuario.
-  const getRoutes = (allRoutes) =>
-    allRoutes.map((route) => {
-      if (route.collapse) {
-        return getRoutes(route.collapse);
+  // Función getRoutes modificada
+  // Reemplaza la definición anterior de getRoutes por esta
+const getRoutes = (allRoutes) =>
+  allRoutes.flatMap((route) => {
+    if (route.collapse) {
+      return getRoutes(route.collapse);
+    }
+
+    if (route.route) {
+      if (route.type === "auth") {
+        return <Route path={route.route} element={route.component} key={route.key} />;
       }
 
-      if (route.route && route.type !== "auth") {
-        return (
-          <Route   
-            exact
-            path={route.route}
-            element={
+      return (
+        <Route
+          exact
+          path={route.route}
+          element={
+            route.adminOnly ? (
+              <AdminRoute>
+                {route.component}
+              </AdminRoute>
+            ) : (
               <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
                 {route.component}
               </ProtectedRoute>
-            }
-            key={route.key}
-          />
-        );
-      }
-      return null;
-    });
+            )
+          }
+          key={route.key}
+        />
+      );
+    }
 
-    // Define un botón flotante que abre el configurador de la aplicación.
-  const configsButton = (
-    <MDBox
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      width="3.25rem"
-      height="3.25rem"
-      bgColor="white"
-      shadow="sm"
-      borderRadius="50%"
-      position="fixed"
-      right="2rem"
-      bottom="2rem"
-      zIndex={99}
-      color="dark"
-      sx={{ cursor: "pointer" }}
-      onClick={handleConfiguratorOpen}
-    >
-      <Icon fontSize="small" color="inherit">
-        settings
-      </Icon>
-    </MDBox>
-  );
+    return [];
+  });
+
+ 
 
   return (
     <>
-
-      {/*  Condición direction === "rtl": Si la dirección del texto es de derecha a izquierda (RTL), 
-      se renderiza la interfaz con estilos RTL.
-        CacheProvider: Proporciona la caché de estilos RTL (rtlCache) para componentes que la necesiten.
-        ThemeProvider: Aplica un tema de Material UI basado en el modo oscuro (darkMode). 
-        Si darkMode es true, usa themeDarkRTL; de lo contrario, usa themeRTL.*/}
       {direction === "rtl" ? (
         <CacheProvider value={rtlCache}>
           <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
@@ -243,19 +204,20 @@ export default function App() {
                   color={sidenavColor}
                   brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
                   brandName="MoreCoast"
-                  routes={routes}
+                  routes={menuRoutes} // Usar menuRoutes filtradas
                   onMouseEnter={handleOnMouseEnter}
                   onMouseLeave={handleOnMouseLeave}
                 />
-                <Configurator />
-                {configsButton}
+                
+              
               </>
             )}
-            {layout === "vr" && <Configurator />}
+           
             <Routes>
               <Route path="login" element={<Navigate to="/auth/login" />} />
               <Route path="register" element={<Navigate to="/auth/register" />} />
               <Route path="forgot-password" element={<Navigate to="/auth/forgot-password" />} />
+              <Route path="/access-denied" element={<AccessDenied />} /> {/* Nueva ruta */}
               {getRoutes(routes)}
               <Route path="*" element={<Navigate to="/auth/login" />} />
             </Routes>
@@ -263,11 +225,6 @@ export default function App() {
         </CacheProvider>
       ) : (
         <ThemeProvider theme={darkMode ? themeDark : theme}>
-          {/*CssBaseline: Normaliza los estilos CSS para garantizar consistencia en todos los navegadores.
-        Renderizado condicional del diseño (layout):
-            Si el diseño es "dashboard", se muestra el menú lateral (Sidenav), el configurador (Configurator)
-             y el botón de configuración (configsButton).
-            Si el diseño es "vr", solo se muestra el configurador. */}
           <CssBaseline />
           {layout === "dashboard" && (
             <>
@@ -275,25 +232,21 @@ export default function App() {
                 color={sidenavColor}
                 brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
                 brandName="MoreCoast"
-                routes={routes}
+                routes={menuRoutes} // Usar menuRoutes filtradas
                 onMouseEnter={handleOnMouseEnter}
                 onMouseLeave={handleOnMouseLeave}
               />
-              <Configurator />
-              {configsButton}
+             
+              
             </>
           )}
-          {layout === "vr" && <Configurator />}
-          {/* Rutas (Routes):
-            Define rutas para login, registro y recuperación de contraseña, redirigiendo a las rutas 
-            correspondientes (/auth/login, /auth/register, etc.).
-            Usa la función getRoutes(routes) para generar rutas dinámicamente.
-            Si la ruta no coincide con ninguna definida (path="*"), redirige al dashboard */}
+          
           <Routes>
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/access-denied" element={<AccessDenied />} /> {/* Nueva ruta */}
             <Route
               exact
               path="user-profile"
@@ -304,9 +257,8 @@ export default function App() {
               }
               key="user-profile"
             />
-            
             {getRoutes(routes)}
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/auth/login" />} />
           </Routes>
         </ThemeProvider>
       )}
