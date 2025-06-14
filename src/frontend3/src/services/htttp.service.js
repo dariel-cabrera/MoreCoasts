@@ -14,34 +14,36 @@ export class HttpService {
     this._axios.interceptors.response.use(onFulfilled, onRejected);
   };
 
- get = async (url, params = {}) => {
+  get = async (url, params = {}) => {
     const config = {
       ...this.getOptionsConfig("get", url),
-      params: params // Añade los parámetros como query params
+      params: params, // Añade los parámetros como query params
     };
     return await this.request(config);
   };
 
-  post = async (url, data) => await this.request(this.getOptionsConfig("post", url, data));
+  post = async (url, data) =>
+    await this.request(this.getOptionsConfig("post", url, data));
 
-  put = async (url, data) => await this.request(this.getOptionsConfig("put", url, data));
+  put = async (url, data) =>
+    await this.request(this.getOptionsConfig("put", url, data));
 
-  patch = async (url, data) => await this.request(this.getOptionsConfig("patch", url, data));
+  patch = async (url, data) =>
+    await this.request(this.getOptionsConfig("patch", url, data));
 
-  delete = async (url) => await this.request(this.getOptionsConfig("delete", url));
+  delete = async (url) =>
+    await this.request(this.getOptionsConfig("delete", url));
 
   getOptionsConfig = (method, url, data) => {
     return {
       method,
       url,
       data,
-      
       headers: {
-        "Content-Type": "application/json", // ✅ Ahora NestJS sí lo procesará bien
-        "Accept": "application/json",
+        "Content-Type": "application/json",
+        Accept: "application/json",
         "Access-Control-Allow-Credentials": true,
-      }
-      
+      },
     };
   };
 
@@ -50,7 +52,18 @@ export class HttpService {
       this._axios
         .request(options)
         .then((res) => resolve(res.data))
-        .catch((ex) => reject(ex.response.data));
+        .catch((ex) => {
+          // ✅ Manejo seguro del error
+          if (ex.response && ex.response.data) {
+            reject(ex.response.data);
+          } else {
+            console.error(
+              "Error de red o sin respuesta del servidor:",
+              ex.message
+            );
+            reject({ message: "No se pudo conectar al servidor." });
+          }
+        });
     });
   }
 }

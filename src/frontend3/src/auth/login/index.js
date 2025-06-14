@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import Card from "@mui/material/Card";
@@ -17,22 +17,44 @@ import AuthService from "services/auth-service";
 import { AuthContext } from "context";
 import DataTrazas from "layouts/trazas/DataTrazas";
 
+// Loading
+const LoadingIndicator = () => (
+  <MDBox display="flex" justifyContent="center" alignItems="center" height="300px" flexDirection="column">
+    <CircularProgress size={60} thickness={4} color="info" />
+    <MDTypography mt={2} variant="button" color="text">
+      Iniciando...
+    </MDTypography>
+  </MDBox>
+);
+
+// Error Component
+const ErrorMessage = ({ error, onRetry }) => (
+  <MDBox p={3} textAlign="center" color="error">
+    <MDTypography color="error" variant="h6">
+      Ocurrió un error
+    </MDTypography>
+    <MDTypography color="text" variant="body2">
+      {error}
+    </MDTypography>
+    <MDButton
+      variant="gradient"
+      color="info"
+      onClick={onRetry}
+      sx={{ mt: 2 }}
+    >
+      Reintentar
+    </MDButton>
+  </MDBox>
+);
+
 function Login() {
   const authContext = useContext(AuthContext);
-  const [credentialsErros, setCredentialsError] = useState(null);
+
   const [rememberMe, setRememberMe] = useState(false);
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(false);
-
-  const [mensaje, setMensaje] = useState({
-    open: false,
-    text: '',
-    severity: 'info',
-  });
-
-  const mostrarMensaje = (text, severity = 'info') => {
-    setMensaje({ open: true, text, severity });
-  };
+  const [fatalError, setFatalError] = useState(null);
+  const [credentialsError, setCredentialsError] = useState(null);
 
   const [inputs, setInputs] = useState({
     user_name: "Admin",
@@ -44,8 +66,9 @@ function Login() {
     passwordError: false,
   });
 
-  const addUserHandler = (newUser) => setUser(newUser);
+  const timeoutRef = useRef(null);
 
+  const addUserHandler = (newUser) => setUser(newUser);
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
   const changeHandler = (e) => {
@@ -55,8 +78,15 @@ function Login() {
     });
   };
 
+  const clearTimeoutIfExists = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
   const submitHandler = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     if (inputs.password.trim().length < 6) {
       setErrors({ ...errors, passwordError: true });
@@ -67,6 +97,7 @@ function Login() {
       user_name: inputs.user_name,
       password: inputs.password,
     };
+
     addUserHandler(newUser);
 
     const myData = {
@@ -77,37 +108,62 @@ function Login() {
     };
 
     setLoading(true);
+    setFatalError(null);
     setCredentialsError(null);
+
+    // Inicia el timeout de 1 minuto (60,000 ms)
+    timeoutRef.current = setTimeout(() => {
+      setFatalError("El servidor está tardando demasiado en responder. Intenta nuevamente.");
+      setLoading(false);
+    }, 60000);
 
     try {
       const response = await AuthService.login(myData);
-      authContext.login(response.access_token, response.refresh_token, response.role);
-      DataTrazas.crear({ accion: 'Se ha autenticado' });
-    } catch (res) {
-      mostrarMensaje("Error en el login", "error");
 
-      if (res?.message) {
-        setCredentialsError(res.message);
-      } else if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-        setCredentialsError(res.errors[0].detail || "Error desconocido.");
+      clearTimeoutIfExists();
+
+      if (!response || !response.access_token || !response.refresh_token) {
+        throw new Error("Respuesta inválida del servidor");
+      }
+
+      authContext.login(response.access_token, response.refresh_token, response.role);
+      DataTrazas.crear({ accion: "Se ha autenticado" });
+    } catch (error) {
+      clearTimeoutIfExists();
+
+      console.error("Error durante el login:", error);
+
+      if (
+        error.message === "Failed to fetch" ||
+        error.message === "Network Error" ||
+        error.name === "TypeError"
+      ) {
+        setFatalError("El servidor no respondió. Intenta nuevamente.");
+      } else if (error?.errors?.[0]?.detail) {
+        setCredentialsError(error.errors[0].detail);
+      } else if (error?.message) {
+        setCredentialsError(error.message);
       } else {
-        setCredentialsError("Error inesperado. Inténtalo de nuevo.");
+        setCredentialsError("Ocurrió un error desconocido.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const LoadingIndicator = () => (
-    <MDBox display="flex" justifyContent="center" alignItems="center" height="300px" flexDirection="column">
-      <CircularProgress size={60} thickness={4} color="info" />
-      <MDTypography mt={2} variant="button" color="text">
-        Iniciando...
-      </MDTypography>
-    </MDBox>
-  );
+  useEffect(() => {
+    return () => clearTimeoutIfExists(); // Limpieza del timeout al desmontar
+  }, []);
 
   if (loading) return <LoadingIndicator />;
+  if (fatalError)
+    return (
+      <BasicLayoutLanding image={bgImage}>
+        <Card>
+          <ErrorMessage error={fatalError} onRetry={submitHandler} />
+        </Card>
+      </BasicLayoutLanding>
+    );
 
   return (
     <BasicLayoutLanding image={bgImage}>
@@ -168,9 +224,9 @@ function Login() {
                 Iniciar
               </MDButton>
             </MDBox>
-            {credentialsErros && (
+            {credentialsError && (
               <MDTypography variant="caption" color="error" fontWeight="light">
-                {credentialsErros}
+                {credentialsError}
               </MDTypography>
             )}
             <MDBox mt={3} mb={1} textAlign="center">
