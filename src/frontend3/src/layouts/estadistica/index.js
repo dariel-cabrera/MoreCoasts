@@ -107,8 +107,8 @@ const ModuloEstadisticas = () => {
     const cargarDatos = async () => {
       try {
         const params = {
-          fechaInicio: fechaInicio.toISOString().split('T')[0],
-          fechaFin: fechaFin.toISOString().split('T')[0],
+          fechaInicio: fechaInicio.toISOString(),
+          fechaFin: fechaFin.toISOString(),
           ubicacion: ubicacionSeleccionada === 'Todas' ? null : ubicacionSeleccionada
         };
 

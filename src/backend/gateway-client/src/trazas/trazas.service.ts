@@ -20,7 +20,11 @@ export class TrazasService{
 
   // Obtener todos los registros
     async getTrazas(): Promise<Trazas[]> {
-      return await this.datosModel.find().exec();
+      const trazas = await this.datosModel.find()
+      .populate('idUser', 'name lastname user_name ci') // campos visibles
+      .exec();
+
+      return trazas;
   
     }
 
@@ -29,15 +33,9 @@ export class TrazasService{
     accion:string,
     idUser: string
   ): Promise<Trazas>{
-    const user = await this.userModel.findOne({ _id:idUser });
-    if(!user){
-      throw new Error('Usuario no encontrado');
-    }
+   
     const nuevoDato= new this.datosModel({
-        user_name:user.user_name,
-        name:user.name,
-        last_name:user.lastname,
-        ci:user.ci,
+        idUser,
         accion,
         fecha: new Date(),
     });
@@ -91,11 +89,14 @@ export class TrazasService{
   }
 
   if (filters.users) {
-    query.users = { $regex: new RegExp(filters.users, 'i') };
-  }
+      query.idUser = filters.users;  // ← asignación directa
+    }
+  
 
   try {
-    return await this.datosModel.find(query).sort({ fecha: -1 }).exec();
+    return await this.datosModel.find(query).sort({ fecha: -1 })
+     .populate('idUser', 'name lastname user_name ci') // campos visibles
+     .exec();
   } catch (error) {
     throw new HttpException('Error al filtrar las trazas', HttpStatus.INTERNAL_SERVER_ERROR);
   }

@@ -136,6 +136,7 @@ function Trazas() {
       ...(filtros.fechaFin && { fechaFin: dayjs(filtros.fechaFin).format('YYYY-MM-DD') }),
       ...(filtros.users && { users: filtros.users.trim() })
     };
+    console.log("Filtros aplicados:", filtros); // Debug
     getFilteredData(params);
   };
 

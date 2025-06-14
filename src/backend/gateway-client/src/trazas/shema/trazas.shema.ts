@@ -1,20 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Date } from 'mongoose';
-
+import { Date, Types } from 'mongoose';
 
 @Schema({ versionKey: false })
 export class Trazas {
-    @Prop({ required: true })
-    user_name: string;
-
-    @Prop({ required: true })
-    name: string;
-
-    @Prop({ required: true })
-    last_name: string;
-
-    @Prop({ required: true })
-    ci: string;
+   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+   idUser: Types.ObjectId;
 
     @Prop({ required: true })
     accion: string;

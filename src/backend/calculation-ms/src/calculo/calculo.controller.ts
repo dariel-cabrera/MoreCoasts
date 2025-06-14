@@ -84,7 +84,8 @@ export class CalculoController {
 
   @MessagePattern('get_q_range')
   getQByDateRange(@Payload() filters: any) {
-    return this.calculoService.getQByDateRange(filters);
+    const Q = this.calculoService.getQByDateRange(filters);
+    return Q;
   }
 
   @MessagePattern('get_p_range')

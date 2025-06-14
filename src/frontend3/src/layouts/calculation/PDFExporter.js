@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import dayjs from 'dayjs';
+import { format } from 'date-fns';
 
 class PDFExporter {
   static exportCalculations(data, filters, action = 'save') {
@@ -37,32 +38,34 @@ class PDFExporter {
     // Configuración de la tabla
     const headers = [
       "Ubicación",
-      "Fecha Muestreo",
-      "Densidad Sed. (kg/m³)",
-      "Densidad Mar (kg/m³)",
-      "Índice Romp (k)",
-      "Coef. Porosidad (n)", 
+      "Fecha",
+      "Hora",
+      "Densidad Sedimento. (kg/m³)",
+      "Densidad Mar. (kg/m³)",
+      "Índice R. (k)",
+      "Coef. P. (n)", 
       "Altura (m)",
       "Ángulo (°)",  
-      "Aceleración (m/s²)",
+      "g (m/s²)",
       "Q (m³)", 
-      "Medición Práctica (m³)", 
+      "P (m³)", 
       "K"
     ];
 
     const tableData = data.map(item => [
       item.ubicacion,
-      dayjs(item.createdAt).format('DD/MM/YYYY HH:mm'),
-      this.formatNumber(item.densidad_a),
-      this.formatNumber(item.densidad_m),
-      this.formatNumber(item.coeficiente),
-      this.formatNumber(item.indice),
-      this.formatNumber(item.altura),
-      this.formatNumber(item.angulo),
-      this.formatNumber(item.aceleracion),
-      this.formatNumber(item.Q),
-      this.formatNumber(item.P),
-      this.formatNumber(item.K)
+      format(new Date(item.fecha), 'dd-MM-yy'),
+      format(new Date(item.fecha), 'HH:mm:ss'),
+      item.densidad_a,
+      item.densidad_m,
+      item.coeficiente,
+      item.indice,
+      item.altura,
+      item.angulo,
+      item.aceleracion,
+      item.Q,
+      item.P,
+      item.K
     ]);
 
     // Generación de la tabla
@@ -71,6 +74,7 @@ class PDFExporter {
       body: tableData,
       startY: 45,
       theme: 'grid',
+      tableWidth: 'auto', // hace que el ancho total se ajuste automáticamente
       styles: {
         fontSize: 8,
         cellPadding: 2,
@@ -84,18 +88,20 @@ class PDFExporter {
         halign: 'center'
       },
       columnStyles: {
-        0: { halign: 'left', cellWidth: 25 },
-        1: { cellWidth: 20 },
-        2: { halign: 'right' },
-        3: { halign: 'right' },
-        4: { halign: 'right' },
-        5: { halign: 'right' },
-        6: { halign: 'right' },
-        7: { halign: 'right' },
-        8: { halign: 'right' },
-        9: { halign: 'right' },
-        10: { halign: 'right' },
-        11: { halign: 'right' }
+       // Aplica mismo ancho y alineación a todas las columnas
+    0: { cellWidth: 'auto', halign: 'center' },
+    1: { cellWidth: 'auto', halign: 'center' },
+    2: { cellWidth: 'auto', halign: 'center' },
+    3: { cellWidth: 'auto', halign: 'center' },
+    4: { cellWidth: 'auto', halign: 'center' },
+    5: { cellWidth: 'auto', halign: 'center' },
+    6: { cellWidth: 'auto', halign: 'center' },
+    7: { cellWidth: 'auto', halign: 'center' },
+    8: { cellWidth: 'auto', halign: 'center' },
+    9: { cellWidth: 'auto', halign: 'center' },
+    10: { cellWidth: 'auto', halign: 'center' },
+    11: { cellWidth: 'auto', halign: 'center' },
+    12: { cellWidth: 'auto', halign: 'center' }
       }
     });
 

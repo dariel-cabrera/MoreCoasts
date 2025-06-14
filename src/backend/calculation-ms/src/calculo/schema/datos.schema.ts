@@ -39,6 +39,8 @@ export class Calculation {
   @Prop({ type: Date, default: Date.now })
   fecha:Date;
 
+  
+
 }
 
 // ✅ Se exporta con un nombre coherente

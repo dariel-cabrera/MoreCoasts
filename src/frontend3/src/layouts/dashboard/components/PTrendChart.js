@@ -70,11 +70,14 @@ const PTrendChart = () => {
           fechaInicio.setMonth(hoy.getMonth() - 1);
       }
 
+       // Ajustar horas para incluir todo el día
+      fechaInicio.setHours(0, 0, 0, 0);  // inicio del día
       const fechaFin = new Date();
+      fechaFin.setHours(23, 59, 59, 999);  // fin del día actual
 
       const params = {
-        fechaInicio: fechaInicio.toISOString().split('T')[0],
-        fechaFin: fechaFin.toISOString().split('T')[0],
+        fechaInicio: fechaInicio.toISOString(),
+        fechaFin: fechaFin.toISOString(),
         ubicacion: selectedUbicacion === 'Todas' ? undefined : selectedUbicacion,
       };
 

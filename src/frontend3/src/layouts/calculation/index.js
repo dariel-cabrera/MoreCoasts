@@ -260,15 +260,12 @@ function Calculation() {
                       setMstNvoCalc(true);
                       setCalculo({ ...val, id: val._id });
                     },
-                    onEliminar: async (id) => {
-                      try {
-                        await eliminarDatos({ idValue: id, getDatos: fetchInitialData });
-                        mostrarMensaje("Registro eliminado correctamente", 'success');
-                      } catch (err) {
-                        mostrarMensaje("Error al eliminar el cálculo", 'error');
-                      }
+                    onEliminar: (id) => { 
+                      eliminarDatos({ idValue: id, getDatos: fetchInitialData });
+                      
                     }
-                  })}
+                    })
+                  }
                   isSorted={false}
                   entriesPerPage={false}
                   showTotalEntries={false}

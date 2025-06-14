@@ -3,6 +3,7 @@ import { Calculation } from "./schema/datos.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { format } from 'date-fns';
+
 import { EcuacionesService } from "./ecuaciones/ecuaciones.service";
 
 @Injectable()
@@ -34,7 +35,8 @@ export class CalculoService {
     const K = this.ecuacionesService.calculationK(params.P, Q);
     return { Q, K };
   }
-
+  
+  // Crear Calculo
   async createCalculo(
     densidad_a: number,
     densidad_m: number,
@@ -46,7 +48,7 @@ export class CalculoService {
     P: number,
     ubicacion: string,
   ): Promise<Calculation> {
-    const fecha = format(new Date(), 'yyyy-MM-dd');
+    const fecha = new Date();
     const { Q, K } = this.calcularQyK({
       densidad_a, densidad_m, indice, coeficiente, altura, angulo, aceleracion, P,
     });
@@ -65,6 +67,7 @@ export class CalculoService {
         K,
         ubicacion,
         fecha,
+        
       });
 
       
@@ -74,6 +77,7 @@ export class CalculoService {
     }
   }
 
+  //Actualizar Calculo
   async updateCalculo(
     id: string,
     densidad_a: number,
@@ -115,7 +119,7 @@ export class CalculoService {
   }
 }
 
-
+  // Eliminar Calculo
   async deleteCalculo(_id: string): Promise<any> {
     try {
       const dato = await this.datosModel.findOne({ _id });
@@ -130,6 +134,7 @@ export class CalculoService {
     }
   }
 
+  // Obtener Todos los Calculos
   async getCalculo(): Promise<Calculation[]> {
     try {
       return await this.datosModel.find().exec();
@@ -138,8 +143,17 @@ export class CalculoService {
     }
   }
 
-  
+  // Obtener las Ubicaciones donde se han realizados los calculos
+  async getLocations() {
+    try {
+      return await this.datosModel.distinct('ubicacion').exec();
+    } catch (error) {
+      throw new HttpException('Error al obtener ubicaciones', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
+  
+  // Obteniendo los calculos segun fecha inicial, fecha final y la ubicacion
   async findAll(filters: {
   fechaInicio?: string;
   fechaFin?: string;
@@ -184,14 +198,8 @@ export class CalculoService {
 }
 
 
-  async getLocations() {
-    try {
-      return await this.datosModel.distinct('ubicacion').exec();
-    } catch (error) {
-      throw new HttpException('Error al obtener ubicaciones', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-  // cálculo.service.ts
+  
+// Obteniendo los valores de Q segun filtros
 async getQByDateRange(filters: {
     fechaInicio: string;
     fechaFin: string;
@@ -226,7 +234,8 @@ async getQByDateRange(filters: {
       throw new HttpException('Error al filtrar datos', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
+  
+  // Obteniendo los valores de P segun filtros
   async getPByDateRange(filters: {
     fechaInicio: string;
     fechaFin: string;
@@ -261,7 +270,8 @@ async getQByDateRange(filters: {
       throw new HttpException('Error al filtrar datos', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
+  
+  // Obteniendo los valores de K segun filtros
   async getKByDateRange(filters: {
     fechaInicio: string;
     fechaFin: string;

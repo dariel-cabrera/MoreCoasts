@@ -4,6 +4,7 @@ import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { format } from 'date-fns';
 
 export const TablaUser = ({ users, onEditar, onEliminar }) => {
   const columns = [
@@ -16,12 +17,13 @@ export const TablaUser = ({ users, onEditar, onEliminar }) => {
     { Header: "Correo", accessor: "correo", align: "left" },
     { Header: "Acciones", accessor: "acciones", align: "center" },
   ];
-
+  
+  
   const rows = Array.isArray(users) ? users.map((val, index) => ({
     index: index + 1,
     usuario: val.user_name,
-    fecha: val.fecha || "Sin fecha",
-    nombre: val.name,
+    fecha: val.createdAt ? format(new Date( val.createdAt), 'dd-MM-yy') : "Sin fecha",
+    nombre:val.name,
     apellido: val.lastname,
     ci: val.ci,
     correo: val.email,

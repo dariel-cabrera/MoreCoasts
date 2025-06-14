@@ -2,7 +2,7 @@ import Swal from 'sweetalert2';
 import CalculationService from "services/calculation-service";
 
 // Función para eliminar datos
-export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
+export const eliminarDatos = async ({ idValue, getDatos }) => {
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
       confirmButton: "btn btn-success",
@@ -25,17 +25,18 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
     try {
       await CalculationService.deleteCalculation(idValue); 
       await getDatos();
-      limpiarDatos();
       swalWithBootstrapButtons.fire({
         title: "Eliminados!",
         text: "Sus datos han sido eliminados",
         icon: "success"
       });
     } catch (error) {
+      console.log(error)
       swalWithBootstrapButtons.fire({
         title: "Error",
         text: "Hubo un problema al eliminar los datos",
         icon: "error"
+        
       });
     }
   } else {
@@ -48,7 +49,7 @@ export const eliminarDatos = async ({ idValue, getDatos, limpiarDatos }) => {
 };
 
 // Función para actualizar datos
-export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) => {
+export const actualizarDatos = async ({ id, calculo, getDatos}) => {
   
   const swalWithBootstrapButtons = Swal.mixin({
     customClass: {
@@ -90,7 +91,6 @@ export const actualizarDatos = async ({ id, calculo, getDatos, limpiarDatos }) =
     try {
       await CalculationService.updateCalculation( data);
       await getDatos();
-      limpiarDatos();
       swalWithBootstrapButtons.fire({
         title: "Actualizados!",
         text: "Sus datos han sido actualizados.",

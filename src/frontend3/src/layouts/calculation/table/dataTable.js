@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import EditIcon from '@mui/icons-material/Edit';
+import { format } from 'date-fns';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export const TablaCalculo = ({ datos, onEditar, onEliminar }) => {
@@ -10,6 +11,7 @@ export const TablaCalculo = ({ datos, onEditar, onEliminar }) => {
     { Header: "#", accessor: "index", align: "left" },
     { Header: "Ubicación", accessor: "ubicacion", align: "left" },
     { Header: "Fecha", accessor: "fecha", align: "left" },
+    { Header: "Hora", accessor: "hora", align: "left" },
     { Header: "Densidad de Arena", accessor: "densidad_a", align: "left" },
     { Header: "Densidad del Mar", accessor: "densidad_m", align: "left" },
     { Header: "Coeficiente", accessor: "coeficiente", align: "left" },
@@ -26,7 +28,8 @@ export const TablaCalculo = ({ datos, onEditar, onEliminar }) => {
   const rows = Array.isArray(datos) ? datos.map((val, index) => ({
     index: index + 1,
     ubicacion: val.ubicacion || "Sin ubicación",
-    fecha: val.fecha || "Sin fecha",
+    fecha: val.fecha ? format(new Date(val.fecha), 'dd-MM-yy') : "Sin fecha",
+    hora: val.fecha ? format(new Date(val.fecha), 'HH:mm:ss') : "Sin Hora",
     densidad_a: val.densidad_a,
     densidad_m: val.densidad_m,
     coeficiente: val.coeficiente,

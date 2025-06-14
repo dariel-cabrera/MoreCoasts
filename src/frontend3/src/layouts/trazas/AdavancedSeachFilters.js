@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { TextField, MenuItem, Grid, Button, Box } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -50,16 +50,16 @@ const AdvancedSearchFilters = ({
             <TextField
               select
               label="Usuarios"
-              name="usuarios"
-              value={filters.ubicacion}
+              name="users" 
+              value={filters.users}
               onChange={onFilterChange}
               fullWidth
             >
               <MenuItem value="">Todos los usuarios</MenuItem>
               {users.map((user) => (
-              <MenuItem key={user._id} value={user._id}>
-                {user.user_name} 
-              </MenuItem>
+                <MenuItem key={user._id} value={user._id}>
+                  {user.user_name}
+                </MenuItem>
               ))}
             </TextField>
           </Grid>
@@ -89,13 +89,14 @@ const AdvancedSearchFilters = ({
 
 export default AdvancedSearchFilters;
 
+// ✅ Corrección en propTypes
 AdvancedSearchFilters.propTypes = {
   filters: PropTypes.shape({
     fechaInicio: PropTypes.string,
     fechaFin: PropTypes.string,
-   user: PropTypes.string,
+    users: PropTypes.string, // <- estaba mal como 'user'
   }).isRequired,
-  locations: PropTypes.arrayOf(PropTypes.string).isRequired,
+  users: PropTypes.arrayOf(PropTypes.object).isRequired, // <- estaba como 'locations'
   onFilterChange: PropTypes.func.isRequired,
   onApplyFilters: PropTypes.func.isRequired,
   onClearFilters: PropTypes.func.isRequired,

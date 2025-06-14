@@ -2,6 +2,11 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 
 @Injectable()
 export class EcuacionesService {
+  roundDecimals(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+  }
+
   calculationQ (
     densidad_a: number,
     densidad_m: number,
@@ -28,8 +33,8 @@ export class EcuacionesService {
       if (isNaN(Q)) {
             throw new HttpException('Resultado no es un número válido', HttpStatus.BAD_REQUEST);
           }
-
-          return Q;
+          
+          return this.roundDecimals(Q, 4);
         } catch (error) {
           if (error instanceof HttpException) {
             throw error;
@@ -44,7 +49,7 @@ export class EcuacionesService {
   ):number{
 
     const K= P/Q
-    return K;
+    return this.roundDecimals(K,4);
 
   }
 

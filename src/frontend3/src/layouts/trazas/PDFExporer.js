@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import dayjs from 'dayjs';
+import { format } from 'date-fns';
 
 class PDFExporter {
   static exportTrazas(data, filters, action = 'save') {
@@ -38,6 +39,7 @@ class PDFExporter {
     const headers = [
       "Usuario",
       "Fecha ",
+      "Hora",
       "Nombre",
       "Apellido",
       "CI",
@@ -45,11 +47,12 @@ class PDFExporter {
     ];
 
     const tableData = data.map(item => [
-      item.user_name,
-      dayjs(item.fecha).format('DD/MM/YYYY HH:mm'),
-      item.name,
-      item.last_name,
-      item.ci,
+      item.idUser.user_name,
+      item.fecha ? format(new Date(item.fecha), 'dd-MM-yy') : "Sin fecha",
+      item.fecha ? format(new Date(item.fecha), 'HH:mm:ss') : "Sin Hora",
+      item.idUser.name,
+      item.idUser.lastname,
+      item.idUser.ci,
       item.accion
       
     ]);
