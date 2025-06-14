@@ -5,12 +5,14 @@ import { InjectModel } from "@nestjs/mongoose";
 import { format } from 'date-fns';
 
 import { EcuacionesService } from "./ecuaciones/ecuaciones.service";
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CalculoService {
   constructor(
     @InjectModel(Calculation.name) private readonly datosModel: Model<Calculation>,
     private readonly ecuacionesService: EcuacionesService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private calcularQyK(params: {
@@ -70,7 +72,8 @@ export class CalculoService {
         
       });
 
-      
+      // 📢 Emitimos evento como parte del patrón Saga
+      this.eventEmitter.emit('calculo.created', nuevoDato);
       return await nuevoDato.save();
     } catch (error) {
       throw new HttpException('Error al crear el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -113,8 +116,10 @@ export class CalculoService {
       if (!updated) {
           throw new HttpException('Cálculo no encontrado', HttpStatus.NOT_FOUND);
       }
+      // 📢 Evento emitido para saga de actualización
+    this.eventEmitter.emit('calculo.updated', updated)
       return updated;
-     } catch (error) {
+    } catch (error) {
     throw new HttpException('Error al actualizar el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
@@ -127,7 +132,7 @@ export class CalculoService {
         throw new HttpException('Cálculo no encontrado', HttpStatus.NOT_FOUND);
       }
 
-      
+      this.eventEmitter.emit('calculo.deleted', { _id });
       return await this.datosModel.deleteOne({ _id });
     } catch (error) {
       throw new HttpException('Error al eliminar el cálculo', HttpStatus.INTERNAL_SERVER_ERROR);

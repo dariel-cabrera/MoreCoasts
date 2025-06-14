@@ -6,16 +6,15 @@ import {
   Query,
   Delete,
   Param,
-  Patch,
-  Inject,
   Put,
+  Inject,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { CALCULATION_SERVICE } from 'src/config';
 import { CreateCalculoDto } from './dto/create.dto';
 import { UpdateCalculoDto } from './dto/update.dto';
 import { FilterCalculoDto } from './dto/filter.dto';
-
+import { createBreaker } from 'src/shared/circuit-breaker/circuit-breaker.service';
 @Controller()
 export class CalculoController {
   constructor(
@@ -24,48 +23,74 @@ export class CalculoController {
   ) {}
 
   @Get('getCalculation')
-  getAll() {
-    return this.calculationCliente.send('get_calculo', {});
+  async getAll() {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('get_calculo', {}).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Get('getfiltrosCalculation')
-  filter(@Query() filters: FilterCalculoDto) {
-    return this.calculationCliente.send('filter_calculos', filters);
+  async filter(@Query() filters: FilterCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('filter_calculos', filters).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Get('getLocations')
-  getLocations() {
-    return this.calculationCliente.send('get_locations', {});
+  async getLocations() {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('get_locations', {}).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Get('getfiltrosQ')
-  getQByRange(@Query() filters: FilterCalculoDto) {
-    return this.calculationCliente.send('get_q_range', filters);
+  async getQByRange(@Query() filters: FilterCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('get_q_range', filters).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Get('getfiltrosP')
-  getPByRange(@Query() filters: FilterCalculoDto) {
-    return this.calculationCliente.send('get_p_range', filters);
+  async getPByRange(@Query() filters: FilterCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('get_p_range', filters).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Get('getfiltrosK')
-  getKByRange(@Query() filters: FilterCalculoDto) {
-    return this.calculationCliente.send('get_k_range', filters);
+  async getKByRange(@Query() filters: FilterCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('get_k_range', filters).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Post('postCalculation')
-  create(@Body() data: CreateCalculoDto) {
-    return this.calculationCliente.send('create_calculo', data);
+  async create(@Body() data: CreateCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('create_calculo', data).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Put('updateCalculation')
-  update( @Body() data: UpdateCalculoDto) {
-    console.log(data)
-    return this.calculationCliente.send('update_calculo',  data );
+  async update(@Body() data: UpdateCalculoDto) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('update_calculo', data).toPromise(),
+    );
+    return breaker.fire();
   }
 
   @Delete('deleteCalculation/:id')
-  delete(@Param('id') id: string) {
-    return this.calculationCliente.send('delete_calculo', { _id: id });
+  async delete(@Param('id') id: string) {
+    const breaker = createBreaker(() =>
+      this.calculationCliente.send('delete_calculo', { _id: id }).toPromise(),
+    );
+    return breaker.fire();
   }
 }

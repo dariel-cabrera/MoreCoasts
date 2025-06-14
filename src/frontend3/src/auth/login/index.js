@@ -1,35 +1,39 @@
 import { useContext, useState } from "react";
-
-// react-router-dom components
 import { Link } from "react-router-dom";
 
-// @mui material components
 import Card from "@mui/material/Card";
 import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
 
-
-// Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDInput from "components/MDInput";
 import MDButton from "components/MDButton";
 
-// Authentication layout components
 import BasicLayoutLanding from "layouts/authentication/components/BasicLayoutLanding";
-
-// Images
 import bgImage from "assets/images/playa1.jpg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
 import DataTrazas from "layouts/trazas/DataTrazas";
 
-
 function Login() {
   const authContext = useContext(AuthContext);
   const [credentialsErros, setCredentialsError] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const [user,setUser]=useState({});
+  const [user, setUser] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [mensaje, setMensaje] = useState({
+    open: false,
+    text: '',
+    severity: 'info',
+  });
+
+  const mostrarMensaje = (text, severity = 'info') => {
+    setMensaje({ open: true, text, severity });
+  };
+
   const [inputs, setInputs] = useState({
     user_name: "Admin",
     password: "secret",
@@ -52,17 +56,17 @@ function Login() {
   };
 
   const submitHandler = async (e) => {
-    // check rememeber me?
     e.preventDefault();
-
-    
 
     if (inputs.password.trim().length < 6) {
       setErrors({ ...errors, passwordError: true });
       return;
     }
 
-    const newUser = { user_name: inputs.user, password: inputs.password };
+    const newUser = {
+      user_name: inputs.user_name,
+      password: inputs.password,
+    };
     addUserHandler(newUser);
 
     const myData = {
@@ -71,17 +75,17 @@ function Login() {
         attributes: { ...newUser },
       },
     };
-    console.log(myData);
-    // Hubo Cambios Aki 
+
+    setLoading(true);
+    setCredentialsError(null);
 
     try {
       const response = await AuthService.login(myData);
-      console.log(response.role)
-      authContext.login(response.access_token, response.refresh_token,response.role);
-      DataTrazas.crear({accion: 'Se ha autenticado'});
+      authContext.login(response.access_token, response.refresh_token, response.role);
+      DataTrazas.crear({ accion: 'Se ha autenticado' });
     } catch (res) {
-      console.error("Error en el login:", res);
-    
+      mostrarMensaje("Error en el login", "error");
+
       if (res?.message) {
         setCredentialsError(res.message);
       } else if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
@@ -89,20 +93,21 @@ function Login() {
       } else {
         setCredentialsError("Error inesperado. Inténtalo de nuevo.");
       }
+    } finally {
+      setLoading(false);
     }
-
-    return () => {
-      setInputs({
-        user: "",
-        password: "",
-      });
-
-      setErrors({
-        userError: false,
-        passwordError: false,
-      });
-    };
   };
+
+  const LoadingIndicator = () => (
+    <MDBox display="flex" justifyContent="center" alignItems="center" height="300px" flexDirection="column">
+      <CircularProgress size={60} thickness={4} color="info" />
+      <MDTypography mt={2} variant="button" color="text">
+        Iniciando...
+      </MDTypography>
+    </MDBox>
+  );
+
+  if (loading) return <LoadingIndicator />;
 
   return (
     <BasicLayoutLanding image={bgImage}>
@@ -121,7 +126,6 @@ function Login() {
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
             Iniciar Sesión
           </MDTypography>
-          
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
           <MDBox component="form" role="form" method="POST" onSubmit={submitHandler}>
@@ -130,10 +134,10 @@ function Login() {
                 type="text"
                 label="Usuario"
                 fullWidth
-                value={inputs.email}
-                name="user"
+                value={inputs.user_name}
+                name="user_name"
                 onChange={changeHandler}
-                error={errors.emailError}
+                error={errors.userError}
               />
             </MDBox>
             <MDBox mb={2}>
