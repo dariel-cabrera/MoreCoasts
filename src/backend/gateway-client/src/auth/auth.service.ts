@@ -43,7 +43,6 @@ export class AuthService {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      console.log(user.password)
       throw new HttpException('Contraseña incorrecta', HttpStatus.UNAUTHORIZED);
     }
     
@@ -55,7 +54,6 @@ export class AuthService {
       
       };
     const token = this.jwtService.sign(payload);
-    console.log(user.rol);
 
     return {
       id:user._id,
