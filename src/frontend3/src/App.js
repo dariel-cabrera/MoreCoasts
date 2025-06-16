@@ -99,7 +99,7 @@ export default function App() {
 
   // Obtener rol del contexto
   const { role } = authContext;
-  console.log(role)
+  
 
   useEffect(() => {
     setIsDemo(process.env.REACT_APP_IS_DEMO === "false");
@@ -249,7 +249,7 @@ const getRoutes = (allRoutes) =>
             <Route path="/access-denied" element={<AccessDenied />} /> {/* Nueva ruta */}
             <Route
               exact
-              path="user-profile"
+              path="/user-profile"
               element={
                 <ProtectedRoute isAuthenticated={authContext.isAuthenticated}>
                   <UserProfile />

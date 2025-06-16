@@ -114,23 +114,18 @@ const ModuloEstadisticas = () => {
   });
 
   const formatearDatosPieChart = (data, parametro) => {
-    const valores = {};
-    data.forEach(item => {
-      const fecha = new Date(item.fecha).toLocaleDateString();
-      valores[fecha] = (valores[fecha] || 0) + item[parametro];
-    });
-    return {
-      labels: Object.keys(valores),
-      datasets: {
-        label: `Distribución de ${parametro}`,
-        data: Object.values(valores),
-        backgroundColor: [
-          "#42A5F5", "#66BB6A", "#FFA726", "#EF5350",
-          "#AB47BC", "#29B6F6", "#FF7043", "#9CCC65"
-        ],
-      }
-    };
+  return {
+    labels: data.map(item => `${new Date(item.fecha).toLocaleDateString()} (${item[parametro]})`),
+    datasets: {
+      label: `Distribución de ${parametro}`,
+      data: data.map(item => item[parametro]),
+      backgroundColor: [
+        "#42A5F5", "#66BB6A", "#FFA726", "#EF5350",
+        "#AB47BC", "#29B6F6", "#FF7043", "#9CCC65"
+      ],
+    }
   };
+};
 
   const renderGraficos = () => {
       if (datosQ.length === 0 && datosK.length === 0 && datosP.length === 0) {

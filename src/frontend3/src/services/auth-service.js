@@ -8,6 +8,7 @@ class AuthService {
     return await HttpService.post(loginEndpoint, payload);
   };
 
+
   register = async (credentials) => {
     const registerEndpoint = 'register';
     return await HttpService.post(registerEndpoint, credentials);
@@ -29,7 +30,7 @@ class AuthService {
   }
 
   getProfile = async() => {
-    const getProfile = 'me';
+    const getProfile = 'getProfile';
     return await HttpService.get(getProfile);
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -67,35 +67,22 @@ export class AuthService {
       refresh_token: token,
     };
   }
-
-  // 🔓 Registro de usuario
-  async register(name: string, email: string, password: string) {
-    const existingUser = await this.userModel.findOne({ email });
-    if (existingUser) {
-      throw new HttpException('El email ya está en uso', HttpStatus.BAD_REQUEST);
+ 
+  // 👤 Obtener perfil del usuario autenticado
+  
+  async getProfile(userPayload: any) {
+    const user = await this.userModel.findById(userPayload).select('name lastname user_name');
+    
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
-
-    if (!password || password.length < 8) {
-      throw new HttpException('La contraseña debe tener al menos 8 caracteres', HttpStatus.BAD_REQUEST);
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new this.userModel({ name, email, password: hashPassword });
-    await newUser.save();
-
-    // Generar JWT token
-    const payload = { id: newUser.id, email: newUser.email };
-    const token = this.jwtService.sign(payload);
 
     return {
-      token_type: 'Bearer',
-      expires_in: '24h',
-      access_token: token,
-      refresh_token: token,
+      name: user.name,
+      lastName: user.lastname,
+      user_name: user.user_name,
     };
-  }
+  } 
 
   // 🔁 Olvidó su contraseña
   async forgotPassword(email: string) {

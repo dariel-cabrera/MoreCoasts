@@ -1,6 +1,7 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller()
 export class AuthController {
@@ -24,6 +25,16 @@ async login(@Body() LoginDto: { data: { type: string; attributes: { user_name: s
 
   // Llamar al servicio con los datos extraídos
   return this.authService.login(user_name, password);
+}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('getProfile')
+  async getProfile(@Req() req: Request) {
+    const idUser = req['userId']; // Extrae el ID del usuario del request
+    const perfil=  this.authService.getProfile(idUser);
+    console.log(perfil);
+    return perfil
+  }
 }
 
 /*
@@ -53,4 +64,4 @@ async login(@Body() LoginDto: { data: { type: string; attributes: { user_name: s
     );
   }
     */
-}
+
