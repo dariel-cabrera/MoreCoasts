@@ -164,7 +164,7 @@ const routes = [
     route: "/user-profile",
     component: <UserProfile />,
     adminOnly: false, // Accesible para todos
-    showInMenu: true // Normalmente el perfil se accede desde un menú desplegable
+    showInMenu: false // Normalmente el perfil se accede desde un menú desplegable
   },
   {
     type: "collapse",
