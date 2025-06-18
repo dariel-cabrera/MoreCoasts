@@ -31,7 +31,7 @@ export class TrazasController {
       if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
         throw new Error('La fecha de inicio no puede ser mayor a la fecha fin');
       }
-      console.log(users)
+    
       
       return this.trazasService.findAll({
           fechaInicio,
@@ -45,7 +45,6 @@ export class TrazasController {
    @Post('postTrazas/:accion')
         async postTrazas(@Param('accion') accion:string,@Req() request: Request){
         const idUser = request['userId']; // Extrae el ID del usuario del request
-        console.log(idUser)
         return this.trazasService.createTrazas(accion, idUser);
     } 
 

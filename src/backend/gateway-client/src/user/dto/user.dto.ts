@@ -54,5 +54,9 @@ export class UpdateUserDto {
   @IsEmail()
   readonly email: string;
 
+  @IsOptional()
+  @IsString()
+  password?: string;
+
   
 }

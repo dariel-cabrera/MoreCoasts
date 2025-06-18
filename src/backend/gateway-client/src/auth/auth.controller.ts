@@ -13,7 +13,6 @@ export class AuthController {
 async login(@Body() LoginDto: { data: { type: string; attributes: { user_name: string; password: string } } }) {
   const { type, attributes } = LoginDto.data;
 
-  console.log('Datos recibidos del frontend:', LoginDto);
 
   // Validar que el tipo sea 'token'
   if (type !== 'token') {
@@ -32,7 +31,7 @@ async login(@Body() LoginDto: { data: { type: string; attributes: { user_name: s
   async getProfile(@Req() req: Request) {
     const idUser = req['userId']; // Extrae el ID del usuario del request
     const perfil=  this.authService.getProfile(idUser);
-    console.log(perfil);
+    
     return perfil
   }
 }

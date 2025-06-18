@@ -11,6 +11,5 @@ export class ReseedAction {
 
   async execute() {
     await this.userModel.deleteMany({});
-    console.log('DB cleared');
   }
 }

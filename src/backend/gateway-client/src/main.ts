@@ -18,7 +18,6 @@ async function bootstrap() {
     if (!origin || whitelist.includes(origin.replace(/\/$/, ''))) {
       callback(null, true);
     } else {
-      console.log(`Bloqueado por CORS: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },

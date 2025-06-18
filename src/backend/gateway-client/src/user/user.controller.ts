@@ -30,11 +30,14 @@ export class UserController {
   
   // Actualizar un usuario
   @Put('updateUsers/:id')  // Corregido: agregar `:id` para actualizar un usuario específico
-  async updateUser(@Param('id') id: string, @Body() updateData: UpdateUserDto): Promise<User> {
-    const{user_name,name,rol,lastname,email}=updateData
-    return this.userService.update(id, user_name,name,rol,lastname,email);
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateData: UpdateUserDto
+  ): Promise<User> {
+    // Pasamos el objeto completo en lugar de parámetros individuales
+    
+    return this.userService.update(id, updateData);
   }
-
   // Eliminar un usuario
   @Delete('deleteUsers/:id')  // Corregido: agregar `:id` para eliminar un usuario específico
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {

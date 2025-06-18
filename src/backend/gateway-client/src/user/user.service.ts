@@ -5,6 +5,7 @@ import { User } from './shema/user.shema';
 import * as bcrypt from 'bcrypt';
 import { PasswordReset, PasswordResetDocument } from './shema/password-reset.schema';
 import { isEmail } from 'class-validator';
+import { UpdateUserDto } from './dto/user.dto';
 
 
 @Injectable()
@@ -90,33 +91,31 @@ export class UserService {
 }
 
 
-   async update(
-    id: string,
-    user_name: string,
-    name: string,
-    rol: string,
-    last_name: string,
-    email: string,
-  ): Promise<User> {
-    const updatedUser = await this.userModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          user_name,
-          name,
-          rol,
-          last_name,
-          email,
-        },
-      },
-      { new: true }, // Retorna el documento actualizado
-    );
-
-    if (!updatedUser) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    // Buscamos el usuario existente
+    const user = await this.userModel.findById(id).exec();
+    
+    if (!user) {
+      throw new Error('Usuario no encontrado');
     }
 
-    return updatedUser;
+    // Actualizamos solo los campos que vienen en el DTO
+    if (updateUserDto.user_name) user.user_name = updateUserDto.user_name;
+    if (updateUserDto.name) user.name = updateUserDto.name;
+    if (updateUserDto.rol) user.rol = updateUserDto.rol;
+    if (updateUserDto.lastname) user.lastname = updateUserDto.lastname;
+    if (updateUserDto.email) user.email = updateUserDto.email;
+    
+    // Actualizamos password solo si se proporciona
+    if (updateUserDto.password) {
+      console.log(updateUserDto.password)
+      // Encriptar contraseña y guardar
+    const salt = await bcrypt.genSalt(10);
+    const  hashedPassword  = await bcrypt.hash( updateUserDto.password, salt);
+      user.password = hashedPassword;
+    }
+
+    return user.save();
   }
   
 

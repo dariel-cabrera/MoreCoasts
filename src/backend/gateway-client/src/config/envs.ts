@@ -29,15 +29,6 @@ const envsSchema= joi.object({
 })
 .unknown(true);
 
-console.log('CARGANDO ENV', {
-  PORT: process.env.PORT,
-  CALCULATION_MS_HOST: process.env.CALCULATION_MS_HOST,
-  CALCULATION_MS_PORT: process.env.CALCULATION_MS_PORT,
-  APP_URL_CLIENT: process.env.APP_URL_CLIENT,
-  APP_URL_API: process.env.APP_URL_API,
-  MONGO_URI:process.env. MONGO_URI
-});
-
 
 const {error, value}= envsSchema.validate(process.env);
 
