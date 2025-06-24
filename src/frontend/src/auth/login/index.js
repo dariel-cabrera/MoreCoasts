@@ -199,7 +199,7 @@ function Login() {
             <MDBox mb={2}>
               <MDInput
                 type="password"
-                label="Password"
+                label="Contraseña"
                 fullWidth
                 name="password"
                 value={inputs.password}

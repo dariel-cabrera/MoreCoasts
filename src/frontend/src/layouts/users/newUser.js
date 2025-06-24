@@ -24,6 +24,14 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
     validateForm();
   }, [user, confirmPassword]);
 
+  // Validar confirmación cuando cambia la contraseña principal
+  useEffect(() => {
+    if (user.password) {
+      const error = validateConfirmPassword(confirmPassword);
+      setErrors(prev => ({ ...prev, confirmPassword: error }));
+    }
+  }, [user.password]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -36,39 +44,48 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
   };
 
   const validateField = (name, value) => {
+    const val = value !== undefined && value !== null ? String(value) : "";
     let error = "";
 
     switch (name) {
       case "user_name":
-        if (!value.trim()) error = "Campo requerido";
-        else if (value.length < 3) error = "Mínimo 3 caracteres";
-        else if (!/^[a-zA-Z0-9_]+$/.test(value)) error = "Solo letras, números y guiones bajos";
+        if (!val.trim()) error = "Campo requerido";
+        else if (val.length < 3) error = "Mínimo 3 caracteres";
+        else if (!/^[a-zA-Z0-9_]+$/.test(val)) error = "Solo letras, números y guiones bajos";
         break;
       case "email":
-        if (!value.trim()) error = "Campo requerido";
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) error = "Correo inválido";
+        if (!val.trim()) error = "Campo requerido";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) error = "Correo inválido";
         break;
       case "name":
       case "lastname":
-        if (!value.trim()) error = "Campo requerido";
-        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) error = "Solo letras y espacios";
+        if (!val.trim()) error = "Campo requerido";
+        else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(val)) error = "Solo letras y espacios";
         break;
       case "password":
+        // En edición, la contraseña es opcional
         if (!editar) {
-          if (!value) error = "Campo requerido";
-          else if (value.length < 6) error = "Mínimo 6 caracteres";
-          else if (!/(?=.*[A-Z])(?=.*[0-9])/.test(value)) error = "Debe contener mayúscula y número";
+          // En creación es obligatoria
+          if (!val) error = "Campo requerido";
+          else if (val.length < 6) error = "Mínimo 6 caracteres";
+          else if (!/(?=.*[A-Z])(?=.*[0-9])/.test(val)) error = "Debe contener mayúscula y número";
+        } else {
+          // En edición, si se completa, debe cumplir requisitos
+          if (val && val.length > 0) {
+            if (val.length < 6) error = "Mínimo 6 caracteres";
+            else if (!/(?=.*[A-Z])(?=.*[0-9])/.test(val)) error = "Debe contener mayúscula y número";
+          }
         }
         break;
       case "ci":
-        if (!editar && !value) {
-          error = "Campo requerido";
-        } else if (value && !/^\d{11}$/.test(value)) {
-          error = "El CI debe tener exactamente 11 dígitos";
+        // CI solo obligatorio en creación
+        if (!editar) {
+          if (!val) error = "Campo requerido";
+          else if (!/^\d{11}$/.test(val)) error = "El CI debe tener exactamente 11 dígitos";
         }
         break;
       case "rol":
-        if (!value) error = "Selecciona un rol";
+        if (!val) error = "Selecciona un rol";
         break;
     }
 
@@ -78,8 +95,23 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
 
   const validateConfirmPassword = (value) => {
     let error = "";
-    if (!editar && value !== user.password) {
-      error = "Las contraseñas no coinciden";
+    
+    if (!editar) {
+      // En creación es obligatorio
+      if (!value.trim()) {
+        error = "Campo requerido";
+      } else if (value !== user.password) {
+        error = "Las contraseñas no coinciden";
+      }
+    } else {
+      // En edición, solo validar si se completó contraseña
+      if (user.password && user.password.length > 0) {
+        if (!value.trim()) {
+          error = "Campo requerido para confirmar";
+        } else if (value !== user.password) {
+          error = "Las contraseñas no coinciden";
+        }
+      }
     }
     return error;
   };
@@ -91,25 +123,30 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
       "name",
       "lastname",
       "rol",
-      "password",
-      ...(editar ? [] : [ "ci"])
+      ...(editar ? [] : ["ci"]) // CI solo en creación
     ];
 
     let isValid = true;
     const newErrors = {};
 
+    // Validar campos obligatorios
     requiredFields.forEach((field) => {
       const value = user[field];
       const fieldValid = validateField(field, value);
       if (!fieldValid) isValid = false;
     });
 
+    // Validación especial para contraseña en creación
     if (!editar) {
-      const confirmPwdError = validateConfirmPassword(confirmPassword);
-      if (confirmPwdError) {
-        newErrors.confirmPassword = confirmPwdError;
-        isValid = false;
-      }
+      const passwordValid = validateField("password", user.password);
+      if (!passwordValid) isValid = false;
+    }
+
+    // Validar confirmación de contraseña
+    const confirmPwdError = validateConfirmPassword(confirmPassword);
+    if (confirmPwdError) {
+      newErrors.confirmPassword = confirmPwdError;
+      isValid = false;
     }
 
     setErrors((prev) => ({ ...prev, ...newErrors }));
@@ -140,8 +177,6 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
             { label: "Correo", name: "email", type: "email" },
             { label: "Nombre", name: "name", type: "text" },
             { label: "Apellido", name: "lastname", type: "text" },
-            { label: "Contraseña", name: "password", type: "password" },
-             { label: "Confirmar Contraseña", name: "confirmPassword", type: "password" },
           ].map((item) => (
             <Grid item xs={6} key={item.name}>
               <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
@@ -161,34 +196,67 @@ export const NewUser = ({ user, setUser, limpiarDatos, editar, getDatos }) => {
             </Grid>
           ))}
 
-          {!editar && (
-            <>
-             
+          {/* Campos de contraseña para ambos modos */}
+          <Grid item xs={6}>
+            <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
+              <MDInput
+                type="password"
+                label={editar ? "Nueva Contraseña (opcional)" : "Contraseña"}
+                name="password"
+                value={user.password || ""}
+                onChange={handleChange}
+                onBlur={(e) => validateField("password", e.target.value)}
+                error={!!errors.password}
+                helperText={errors.password || (editar ? "Dejar vacío para mantener actual" : "")}
+                fullWidth
+              />
+            </MDBox>
+          </Grid>
+          
+          <Grid item xs={6}>
+            <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
+              <MDInput
+                type="password"
+                label={editar ? "Confirmar Nueva Contraseña" : "Confirmar Contraseña"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => {
+                  const error = validateConfirmPassword(confirmPassword);
+                  setErrors(prev => ({ ...prev, confirmPassword: error }));
+                }}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword}
+                fullWidth
+              />
+            </MDBox>
+          </Grid>
 
-              <Grid item xs={6}>
-                <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
-                  <MDInput
-                    type="text"
-                    label="Carnet de Identidad"
-                    name="ci"
-                    value={user.ci || ""}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, "");
-                      if (numericValue.length <= 11) {
-                        handleChange({ target: { name: "ci", value: numericValue } });
-                      }
-                    }}
-                    onBlur={(e) => validateField("ci", e.target.value)}
-                    error={!!errors.ci}
-                    helperText={errors.ci}
-                    inputProps={{ maxLength: 11 }}
-                    fullWidth
-                  />
-                </MDBox>
-              </Grid>
-            </>
+          {/* CI solo en creación */}
+          {!editar && (
+            <Grid item xs={6}>
+              <MDBox mt={2} sx={{ width: "100%", maxWidth: 300 }}>
+                <MDInput
+                  type="text"
+                  label="Carnet de Identidad"
+                  name="ci"
+                  value={user.ci || ""}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, "");
+                    if (numericValue.length <= 11) {
+                      handleChange({ target: { name: "ci", value: numericValue } });
+                    }
+                  }}
+                  onBlur={(e) => validateField("ci", e.target.value)}
+                  error={!!errors.ci}
+                  helperText={errors.ci}
+                  inputProps={{ maxLength: 11 }}
+                  fullWidth
+                />
+              </MDBox>
+            </Grid>
           )}
 
+          {/* Rol */}
           <Grid item xs={6}>
             <MDBox mt={4} sx={{ width: "100%", maxWidth: 300 }}>
               <FormControl fullWidth error={!!errors.rol}>

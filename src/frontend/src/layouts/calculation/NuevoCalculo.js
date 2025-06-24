@@ -210,9 +210,12 @@ export const NuevoCalculo = ({ calculo, setCalculo, editar, limpiarDatos, getDat
   return (
     <MDBox sx={{ pl: 2 }}>
       <Grid container direction="column">
-        <MDTypography variant="h5" fontWeight="medium" color="black" mt={1} mb={2}>
-          Nuevo Cálculo
+      
+         <MDTypography variant="h5" fontWeight="medium" color="black" mt={1} mb={2}>
+          {editar ? "Editar Cálculo" : "Nuevo Cálculo"}
         </MDTypography>
+      
+        
 
         {/*Campos del Formulario */}
         <Grid container spacing={2}>

@@ -21,7 +21,7 @@ const handleApiError = (error) => {
 
 export const crear = async (ubicacion) => {
   try {
-    const response = await UbicacionService.createUbicacion(ubicacion);
+    const response = await UbicacionService.postUbicacion(ubicacion);
     return response;
   } catch (error) {
     handleApiError(error);

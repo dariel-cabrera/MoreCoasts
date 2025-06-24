@@ -8,6 +8,7 @@ import React from 'react';
 import ConfiguracionService from 'services/configuracion-service';
 import DashboardLayout from 'examples/LayoutContainers/DashboardLayout';
 import DashboardNavbar from 'examples/Navbars/DashboardNavbar';
+import DataTrazas from "layouts/trazas/DataTrazas";
 import Footer from 'examples/Footer';
 
 export const Configuracion = () => {
@@ -245,7 +246,7 @@ export const Configuracion = () => {
             <Grid item>
               <MDButton
                 variant="gradient"
-                color="success"
+                color="info"
                 size="medium"
                 onClick={handleGuardar}
                 disabled={Object.values(errors).some(e => e)}
