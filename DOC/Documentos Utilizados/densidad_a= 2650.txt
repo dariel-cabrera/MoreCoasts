@@ -1,0 +1,7 @@
+densidad_a= 2650
+densidad_m= 1025
+coeficiente=0.4
+indice=0.78 
+altura=0.50
+Angulo=55
+aceleracion=9.81
